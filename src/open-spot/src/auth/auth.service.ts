@@ -12,22 +12,20 @@ export class AuthService {
 
   async authenticateUser({username, password}: 
                          {username: string, password: string}) : Promise<UserDto> {
+
       const user: User = await this.userService.findOne(username);
-      if (!user) {
-        return null;
-      }
+      console.log(user);
 
       const isMatch = await bcrypt.compare(password, user.password);      
       
       // Check that username and hashd passwords match
       if (username.toLowerCase() === user.username.toLowerCase() && isMatch){
         const {password, ...jwtUser} = user;
+
         return {
           jwtToken: this.jwtService.sign(jwtUser) 
         }
       }
-
-      return null;
   }
 
   authorizeUser(user: User) : UserDto{
