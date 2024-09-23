@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
-import { NewUserDto } from "src/auth/dto";
+import { NewUserDto, UserDto } from "src/auth/dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from 'bcrypt'
 
@@ -16,7 +16,7 @@ export default class UserService{
     // Do a search for the Username.
     const result = await this.prisma.user.findUnique({
       where: {
-         username: username 
+         username: username.toLowerCase() 
       }
     });
 
@@ -29,18 +29,53 @@ export default class UserService{
 
     const results = await this.prisma.user.create({
         data: {
-          email: userInfo.email,
-          username: userInfo.username, 
+          email: userInfo.email.toLowerCase(),
+          username: userInfo.username.toLowerCase(), 
           password: hash,
           firstName: userInfo.firstName,
           lastName: userInfo.lastName,
           paymentRecieved: userInfo.payed,
-          stripeId: "thiswasageneratedId",
+          stripeId: "",
           lastLoginAt: new Date()
         }
+    }).then((response) => { 
+      return response;
+    }).catch(() =>  {
+      throw new ConflictException("Could not create user.");
     })
 
     return results;
+  }
+
+  /**
+   * For tracking purposes update the users login time when they signin.
+   */
+  async updateUserLoginTime(user: User, date: Date)  {
+    console.log("we are here")
+    await this.prisma.user
+    .update({
+      where: {
+        id: user.id
+      },
+      data: {
+        lastLoginAt: date
+      }
+    }).then((res) => console.log("And it was success"))
+    .catch((err) => console.log(err))
+   
+  }
+
+  async usernameExists(username: string): Promise<{exists: boolean}> {
+    // Count that there exists a user with the username that was passed in
+    const count = await this.prisma.user.count({
+      where: {
+        username: username
+      }
+    });
+
+    return {
+      exists : count > 0,
+    }
   }
 
 }

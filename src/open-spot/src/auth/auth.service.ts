@@ -14,12 +14,16 @@ export class AuthService {
                          {username: string, password: string}) : Promise<UserDto> {
 
       const user: User = await this.userService.findOne(username);
-      console.log(user);
+
+      if (!user) {
+        return null;
+      }
 
       const isMatch = await bcrypt.compare(password, user.password);      
       
       // Check that username and hashd passwords match
       if (username.toLowerCase() === user.username.toLowerCase() && isMatch){
+        this.userService.updateUserLoginTime(user, new Date());
         const {password, ...jwtUser} = user;
 
         return {
@@ -28,7 +32,7 @@ export class AuthService {
       }
   }
 
-  authorizeUser(user: User) : UserDto{
+   authorizeUser(user: User) : UserDto{
       const {password, ...jwtUser} = user;
       return { 
         jwtToken : this.jwtService.sign(jwtUser) 
