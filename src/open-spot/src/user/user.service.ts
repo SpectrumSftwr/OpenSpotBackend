@@ -51,7 +51,6 @@ export default class UserService{
    * For tracking purposes update the users login time when they signin.
    */
   async updateUserLoginTime(user: User, date: Date)  {
-    console.log("we are here")
     await this.prisma.user
     .update({
       where: {
@@ -60,9 +59,8 @@ export default class UserService{
       data: {
         lastLoginAt: date
       }
-    }).then((res) => console.log("And it was success"))
-    .catch((err) => console.log(err))
-   
+    })
+    .catch((err) => console.log(err) )
   }
 
   async usernameExists(username: string): Promise<{exists: boolean}> {

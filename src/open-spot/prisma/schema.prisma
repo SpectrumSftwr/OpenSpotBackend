@@ -1,17 +1,13 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
+
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 model User {
   id                  Int         @id @default(autoincrement())
@@ -27,30 +23,35 @@ model User {
   paymentRecieved     Boolean
 
 
+  siteColors          SiteColors?
+  links               UserLinks[]
+
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   lastLoginAt         DateTime    @default(now())
 }
 
-//model Services {
-//
-//  id      Int     @id @default(autoincrement())
-//  name    String  @unique
-//  price   Float
-//}
-//
-//
-//model Packages {
-//  id        Int     @id @default(autoincrement())
-//  services  Services[] 
-//  price     Float
-//} 
-//
-//model AddOns {
-//  id          Int     @id
-//  package_id  Int
-//  service_id  Services[]
-//  price       Float
-//}
 
+model SiteColors {
+  id                  Int         @id @default(autoincrement())
+
+  user                User        @relation(fields: [userId], references: [id]) 
+  userId              Int         @unique // Relation scalar value used in @Relation Atrribute below
+
+  background          String      
+  foreground          String      
+  accent              String      
+  secondary           String      
+}
+
+
+model UserLinks {
+  id                  Int        @id @default(autoincrement())
+
+  user                User       @relation(fields: [userId], references:[id])
+  userId              Int
+  
+  title               String?
+  href                String
+}
 
