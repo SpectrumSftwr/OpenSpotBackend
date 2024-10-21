@@ -1,3 +1,5 @@
 export * from './site.dto'
 export * from './sitelinks.dto'
 export * from './sitecolors.dto'
+export * from './UserPublicDetails.dto'
+export * from './Offerings.dto'

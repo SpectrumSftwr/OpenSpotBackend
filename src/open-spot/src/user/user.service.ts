@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
-import { NewUserDto, UserDto } from "src/auth/dto";
+import { NewUserDto } from "src/auth/dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from 'bcrypt'
 
@@ -75,5 +75,4 @@ export default class UserService{
       exists : count > 0,
     }
   }
-
 }
