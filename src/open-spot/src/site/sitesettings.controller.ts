@@ -19,10 +19,12 @@ export class SiteController {
     let links: SiteLinksDto[];                  // The users links
     let personalDetails: UserPublicDetailsDto;  // The Users Personal Public Details
     let offerings: OfferingsDto[];              // The users offerings
+
     
     // Get User Colors
+    // TODO: RETHINK THEMING, UNABLE TO DO DYNAMIC COLOR SELECTION.
     colors = {
-      background: "black", 
+      background: "bg-red-400", 
       foreground: "white",
       accent: "white",
       secondary: "white",
