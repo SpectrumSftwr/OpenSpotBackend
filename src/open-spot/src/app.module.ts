@@ -16,7 +16,11 @@ import { CalendarModule } from './calendar/calendar.module';
     ConfigModule.forRoot({
     isGlobal: true,
     }), 
-    SiteModule, ReviewsModule, FaqModule, CalendarModule
+    SiteModule, 
+    ReviewsModule, 
+    FaqModule, 
+    CalendarModule,
+    EmailModule,
    ],
 })
 export class AppModule {}
