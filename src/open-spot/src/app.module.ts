@@ -3,10 +3,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { SiteModule } from './site/sitesettings.module';
-import { ReviewsModule } from './reviews/reviews.module';
-import { FaqModule } from './faq/faq.module';
-import { CalendarModule } from './calendar/calendar.module';
+import { EmailModule } from './email/email.module';
+import { UserpageModule } from './userpage/userpage.module';
 
 @Module({
   imports: [
@@ -16,11 +14,7 @@ import { CalendarModule } from './calendar/calendar.module';
     ConfigModule.forRoot({
     isGlobal: true,
     }), 
-    SiteModule, 
-    ReviewsModule, 
-    FaqModule, 
-    CalendarModule,
-    EmailModule,
+    EmailModule, UserpageModule,
    ],
 })
 export class AppModule {}

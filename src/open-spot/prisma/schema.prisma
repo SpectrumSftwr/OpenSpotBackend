@@ -10,79 +10,116 @@ datasource db {
 
 model User {
   id                  Int         @id @default(autoincrement())
-
-  username            String      @unique
   email               String      @unique
   password            String
   firstName           String?
   lastName            String?
-  stripeId            String?      
-  paymentRecieved     Boolean
+  stripe_id           String? 
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
 
-  profileUrl          String?
-  userDescription     String?
-  siteColors          SiteColors?
-  links               UserLinks[]
-  offerings           Offering[]
-  reviews             Reviews[]
-  faqs                FAQs[]
-  gallery             Gallery[]
-
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  lastLoginAt         DateTime    @default(now())
+  business            Business?   
 }
 
-
-model SiteColors {
+model Business {
   id                  Int         @id @default(autoincrement())
-  user                User        @relation(fields: [userId], references: [id]) 
-  userId              Int         @unique // Relation scalar value used in @Relation Atrribute below
-  background          String      
-  foreground          String      
-  accent              String      
-  secondary           String      
+  business_UID        String      // The Businesses URL Path Identifier.
+
+  user_id             Int         @unique
+  user                User        @relation(fields: [user_id], references: [id])
+  business_name       String
+  business_type       String
+  business_banner_url String?
+  profile_picture_url String?
+  profileDescription  String?
+  contact_info        Json?       
+  theme_id            Int         @default(1)
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  business_gallery    BusinessGallery?
+  business_reviews    BusinessReviews[]
+  business_faqs       BusinessFAQs[]
+  business_packages   BusinessPackage[]
+  business_request    Request[]
+  business_bookings   BookingDetails[]
+
 }
 
-
-model UserLinks {
-  id                  Int        @id @default(autoincrement())
-  user                User       @relation(fields: [userId], references:[id])
-  userId              Int
-  title               String?
-  href                String
+model BusinessGallery {
+  id                  Int         @id @default(autoincrement())
+  business_id         Int         @unique
+  business            Business    @relation(fields: [business_id], references: [id])
+  imageUrl            String
 }
 
-model Offering {
-  id                  Int        @id @default(autoincrement())
-  user                User       @relation(fields: [userId], references:[id])
-  userId              Int
-  title               String
-  emoji               String
-  description         String
+model BusinessReviews {
+  id                  Int         @id @default(autoincrement())
+  business_id         Int         
+  business            Business    @relation(fields: [business_id], references: [id])
+  from                String      
+  rating              Int
+  comment             String
 }
 
-model Reviews {
-  id                  Int        @id @default(autoincrement())
-  user                User       @relation(fields: [userId], references:[id])
-  userId              Int
-  stars               Int
-  name                String
-  reviewDescription   String
-  Image               String 
-}
-
-model FAQs {
-  id                  Int        @id @default(autoincrement())
-  user                User       @relation(fields: [userId], references:[id])
-  userId              Int
+model BusinessFAQs {
+  id                  Int         @id @default(autoincrement())
+  business_id         Int         
+  business            Business    @relation(fields: [business_id], references: [id])
   question            String
   answer              String
 }
 
-model Gallery {
-  id                  Int        @id @default(autoincrement())
-  user                User       @relation(fields: [userId], references:[id])
-  userId              Int
-  imageUrl            String
+model BusinessPackage {
+  id                  Int         @id @default(autoincrement())
+  business_id         Int         
+  business            Business    @relation(fields: [business_id], references: [id])
+  title               String
+  icon                String
+  package_image_url   String
+  duration_in_minutes Int    
+  price               Float
+  features            String[]
+  bookings            BookingDetails[]
 }
+
+model Request {
+  id                  Int               @id @default(autoincrement())
+  business_id         Int         
+  business            Business          @relation(fields: [business_id], references: [id])
+
+  booking_id          Int         
+  booking             BookingDetails    @relation(fields: [booking_id], references: [id])
+
+  status              RequestStatusEnum @default(PENDING)
+
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+}
+
+enum RequestStatusEnum {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+
+model BookingDetails {
+  id                  Int               @id @default(autoincrement())
+  business_id         Int         
+  business            Business          @relation(fields: [business_id], references: [id])
+  event_date          DateTime
+  location            String
+  guest_count         Int
+  duration_in_minutes Int
+  event_type          String
+
+  package_id          Int         
+  package             BusinessPackage   @relation(fields: [package_id], references: [id])
+  request             Request[]   
+
+  created_at          DateTime          @default(now())
+  updated_at          DateTime          @updatedAt
+}
+

@@ -12,11 +12,11 @@ export default class UserService{
   /**
    * Finds a user with the given username and returns the User Object.
    */
-  async findOne(username: string): Promise<User>  {
+  async findOne(email: string): Promise<User>  {
     // Do a search for the Username.
     const result = await this.prisma.user.findUnique({
       where: {
-         username: username.toLowerCase() 
+         email: email.toLowerCase() 
       }
     });
 
@@ -30,13 +30,9 @@ export default class UserService{
     const results = await this.prisma.user.create({
         data: {
           email: userInfo.email.toLowerCase(),
-          username: userInfo.username.toLowerCase(), 
           password: hash,
           firstName: userInfo.firstName,
           lastName: userInfo.lastName,
-          paymentRecieved: userInfo.payed,
-          stripeId: "",
-          lastLoginAt: new Date()
         }
     }).then((response) => { 
       return response;
@@ -45,34 +41,5 @@ export default class UserService{
     })
 
     return results;
-  }
-
-  /**
-   * For tracking purposes update the users login time when they signin.
-   */
-  async updateUserLoginTime(user: User, date: Date)  {
-    await this.prisma.user
-    .update({
-      where: {
-        id: user.id
-      },
-      data: {
-        lastLoginAt: date
-      }
-    })
-    .catch((err) => console.log(err) )
-  }
-
-  async usernameExists(username: string): Promise<{exists: boolean}> {
-    // Count that there exists a user with the username that was passed in
-    const count = await this.prisma.user.count({
-      where: {
-        username: username
-      }
-    });
-
-    return {
-      exists : count > 0,
-    }
   }
 }

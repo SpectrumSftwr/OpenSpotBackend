@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from "@nestjs/common";
+import { EmailService } from "./email.service";
 
 @Controller('mail')
 export class EmailController {

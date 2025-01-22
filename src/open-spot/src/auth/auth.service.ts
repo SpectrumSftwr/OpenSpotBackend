@@ -10,10 +10,9 @@ export class AuthService {
   constructor(private jwtService: JwtService,
               private userService: UserService) {}  
 
-  async authenticateUser({username, password}: 
-                         {username: string, password: string}) : Promise<UserDto> {
-
-      const user: User = await this.userService.findOne(username);
+  async authenticateUser({email, password}: 
+                         {email: string, password: string}) : Promise<UserDto> {
+      const user: User = await this.userService.findOne(email);
 
       if (!user) {
         return null;
@@ -22,8 +21,7 @@ export class AuthService {
       const isMatch = await bcrypt.compare(password, user.password);      
       
       // Check that username and hashd passwords match
-      if (username.toLowerCase() === user.username.toLowerCase() && isMatch){
-        this.userService.updateUserLoginTime(user, new Date());
+      if (email.toLowerCase() === user.email.toLowerCase() && isMatch){
         const {password, ...jwtUser} = user;
 
         return {
