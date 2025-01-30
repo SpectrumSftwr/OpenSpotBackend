@@ -21,8 +21,13 @@ export class UserpageController {
     return this.userpageService.getProfileBusinessFaqs(business_uid);
   }
 
+  @Get('/gallery-preview/:business_uid')
+  getBusinessGalleryPreview(@Param('business_uid') business_uid: string) {
+    return this.userpageService.getProfileBusinessGalleryPreview(business_uid);
+  }
+
   @Get('/gallery/:business_uid')
   getBusinessGallery(@Param('business_uid') business_uid: string) {
-
+    return this.userpageService.getProfileBusinessGallery(business_uid);
   }
 }

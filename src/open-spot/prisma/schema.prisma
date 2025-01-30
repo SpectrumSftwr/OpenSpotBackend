@@ -37,7 +37,7 @@ model Business {
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
 
-  business_gallery    BusinessGallery?
+  business_gallery    BusinessGallery[]
   business_reviews    BusinessReviews[]
   business_faqs       BusinessFAQs[]
   business_packages   BusinessPackage[]
@@ -48,9 +48,10 @@ model Business {
 
 model BusinessGallery {
   id                  Int         @id @default(autoincrement())
-  business_id         Int         @unique
+  business_id         Int         
   business            Business    @relation(fields: [business_id], references: [id])
   imageUrl            String
+  created_at          DateTime    @default(now())
 }
 
 model BusinessReviews {

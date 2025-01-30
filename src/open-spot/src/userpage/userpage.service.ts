@@ -44,7 +44,7 @@ export class UserpageService {
                                        reviewAverage._avg.rating, 
                                        reviewsBreakdown);
   }
-  
+
 
   /**
    * Gets the review breakdown for a business.
@@ -98,6 +98,9 @@ export class UserpageService {
   }
 
 
+  /**
+   * Builds the profile details object from the inputed paramters.
+   */
   buildProfileDetailsDto(business: Business, totalReview: number, reviewAverage: number, reviewsBreakdown: ReviewBreakdownDto) 
     : ProfileDetails {
       return {
@@ -112,6 +115,9 @@ export class UserpageService {
       }
     }
 
+    /**
+     * fetches a business's FAQs
+     */
     async getProfileBusinessFaqs(businessName: string): Promise<any> {
       let businessDetails = await this.prisma.business.findFirst({where: {
         business_UID: businessName,
@@ -133,4 +139,58 @@ export class UserpageService {
       return faqs;
     }
 
+    /**
+     * Gets the Business Gallery Preview of 8 Images.
+     */
+    async getProfileBusinessGalleryPreview(businessName: string): Promise<any> {
+      let businessDetails = await this.prisma.business.findFirst({where: {
+        business_UID: businessName,
+      }})
+
+
+      if (businessDetails == null) {
+        return {
+          hasError: true
+        };
+      }
+
+      let imageUrls = await this.prisma.businessGallery.findMany({
+        take: 8,
+        where: {
+          business_id: businessDetails.id
+        },
+        orderBy: {
+          created_at: 'asc'
+        }
+      })
+
+      return imageUrls;
+    }
+
+    /**
+     * Gets the Business Gallery Preview of 8 Images.
+     */
+    async getProfileBusinessGallery(businessName: string): Promise<any> {
+      let businessDetails = await this.prisma.business.findFirst({where: {
+        business_UID: businessName,
+      }})
+
+
+      if (businessDetails == null) {
+        return {
+          hasError: true
+        };
+      }
+
+      let imageUrls = await this.prisma.businessGallery.findMany({
+        where: {
+          business_id: businessDetails.id
+        },
+        orderBy: {
+          created_at: 'asc'
+        }
+      })
+
+      return imageUrls;
+    }
 }
