@@ -15,6 +15,7 @@ import { UserpageModule } from './userpage/userpage.module';
     isGlobal: true,
     }), 
     EmailModule, UserpageModule,
+    UserpageModule,
    ],
 })
 export class AppModule {}

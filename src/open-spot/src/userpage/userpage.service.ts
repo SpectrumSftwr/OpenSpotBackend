@@ -12,11 +12,18 @@ export class UserpageService {
   /**
    * Get The Main Profile Business details.
    */
-  async getProfileBusinessDetails(businessName: string) : Promise<ProfileDetails> {
+  async getProfileBusinessDetails(businessName: string) : Promise<ProfileDetails | {hasError: boolean}> {
+
 
     let businessDetails = await this.prisma.business.findFirst({where: {
       business_UID: businessName,
     }})
+
+    if (businessDetails == null) {
+      return {
+        hasError: true
+      };
+    }
 
     let totalReview = await this.prisma.businessReviews.count({
       where: {
@@ -94,12 +101,36 @@ export class UserpageService {
   buildProfileDetailsDto(business: Business, totalReview: number, reviewAverage: number, reviewsBreakdown: ReviewBreakdownDto) 
     : ProfileDetails {
       return {
+        business_name: business.business_name,
+        business_type: business.business_type,
         profilePicUrl: business.profile_picture_url,
-        bannerPicURl: business.business_banner_url,
+        bannerPicUrl: business.business_banner_url,
         description: business.profileDescription,
         totalReviews: totalReview,
         overallRating: reviewAverage,
         reviewsBreakdown: reviewsBreakdown
       }
     }
+
+    async getProfileBusinessFaqs(businessName: string): Promise<any> {
+      let businessDetails = await this.prisma.business.findFirst({where: {
+        business_UID: businessName,
+      }})
+
+
+      if (businessDetails == null) {
+        return {
+          hasError: true
+        };
+      }
+
+      let faqs = await this.prisma.businessFAQs.findMany({
+        where: {
+          business_id: businessDetails.id
+        }
+      })
+
+      return faqs;
+    }
+
 }
