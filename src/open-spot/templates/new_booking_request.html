@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>New Booking Request</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+            <td>
+                <h2 style="color: #2c3e50;">🎉 New Booking Request – {{client_name}} Wants to Book You!</h2>
+                <p>Hi <strong>{{provider_name}}</strong>,</p>
+                <p>You have a new booking request! Here are the details:</p>
+
+                <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse: collapse; border: 1px solid #ddd;">
+                    <tr style="background-color: #f8f8f8;">
+                        <td><strong>Client Name:</strong></td>
+                        <td>{{client_name}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Event Type:</strong></td>
+                        <td>{{event_type}}</td>
+                    </tr>
+                    <tr style="background-color: #f8f8f8;">
+                        <td><strong>Event Date:</strong></td>
+                        <td>{{event_date}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Event Duration:</strong></td>
+                        <td>{{event_duration}} minutes</td>
+                    </tr>
+                    <tr style="background-color: #f8f8f8;">
+                        <td><strong>Location:</strong></td>
+                        <td>{{event_venue}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Guest Count:</strong></td>
+                        <td>{{guest_count}}</td>
+                    </tr>
+                    <tr style="background-color: #f8f8f8;">
+                        <td><strong>Package:</strong></td>
+                        <td>{{package}}</td>
+                    </tr>
+                </table>
+
+                <h3 style="color: #2c3e50;">📞 Client Contact Information:</h3>
+                <p><strong>Phone:</strong> <a href="tel:{{client_phone}}" style="color: #3498db;">{{client_phone}}</a></p>
+                <p><strong>Email:</strong> <a href="mailto:{{client_email}}" style="color: #3498db;">{{client_email}}</a></p>
+
+                <h3 style="color: #2c3e50; ">📝 Additional Details:</h3>
+                <i>{{client_notes}}</i>
+
+                <br>
+                <p>Please review the request and respond as soon as possible to confirm availability. You can reach out to the client directly using the contact details above.</p>
+
+                <p>If you have any questions or need assistance, feel free to reach out.</p>
+
+                <p>Looking forward to helping you get booked!</p>
+
+                <p>Best,<br>
+                <strong>{{your_name}}</strong><br>
+                <strong>{{your_business_name}}</strong><br>
+                <a href="mailto:{{your_contact_email}}" style="color: #3498db;">{{your_contact_email}}</a></p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -6,4 +6,5 @@ import { PrismaService } from "src/prisma/prisma.service";
 export default class UserController {
 
   constructor(private userService: UserService){}
+
 }

@@ -3,6 +3,8 @@ import { ProfileDetails } from './dto/ProfileDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Business } from '@prisma/client';
 import { ReviewBreakdownDto } from './dto/ReviewBreakdown.dto';
+import { Filters } from 'src/common/dto/filters.dto';
+import { PackageDto } from './dto/Package.dto';
 
 @Injectable()
 export class UserpageService {
@@ -192,5 +194,93 @@ export class UserpageService {
       })
 
       return imageUrls;
+    }
+
+    /**
+     * Gets all the Reviews from the business
+     */
+    async getProfileBusinessReviews(businessName: string): Promise<any> {
+
+      let businessDetails = await this.prisma.business.findFirst({where: {
+        business_UID: businessName,
+      }})
+
+
+      if (businessDetails == null) {
+        return {
+          hasError: true
+        };
+      }
+
+      let reviews = await this.prisma.businessReviews.findMany({
+        where: {
+          business_id: businessDetails.id
+        },
+      })
+
+      const formattedReviews = reviews.map(review => ({
+        ...review,
+        event_date: new Date(review.event_date)
+      }))
+
+      return formattedReviews;
+    }
+
+    /**
+     * Gets all the Reviews from the business
+     */
+    async getBusinessPackages(businessName: string): Promise<PackageDto[]|{hasError:boolean}> {
+
+      let businessDetails = await this.prisma.business.findFirst({where: {
+        business_UID: businessName,
+      }})
+
+
+      if (businessDetails == null) {
+        return {
+          hasError: true
+        };
+      }
+
+      let dbPackages = await this.prisma.businessPackage.findMany({
+        where: {
+          business_id: businessDetails.id
+        }
+      })
+
+      let convertedPackages = dbPackages.map((pkg, index) => {
+        return {
+          id: pkg.id,
+          icon: pkg.icon,
+          title: pkg.title,
+          duration: pkg.duration_in_minutes,
+          price: pkg.price,
+          description: pkg.description,
+          includes: pkg.features,
+        }
+      })
+
+      return convertedPackages
+
+    }
+
+    async getPackageDetails(packageId: string): Promise<PackageDto|{hasError:boolean}> {
+      let pkg = await this.prisma.businessPackage.findFirst({
+        where: {
+          id: parseInt(packageId)
+        }
+      })
+
+      let convertedPackages = {
+          id: pkg.id,
+          icon: pkg.icon,
+          title: pkg.title,
+          duration: pkg.duration_in_minutes,
+          price: pkg.price,
+          description: pkg.description,
+          includes: pkg.features,
+      }
+
+      return convertedPackages ? convertedPackages : {hasError: true};
     }
 }

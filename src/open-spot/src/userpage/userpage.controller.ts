@@ -30,4 +30,19 @@ export class UserpageController {
   getBusinessGallery(@Param('business_uid') business_uid: string) {
     return this.userpageService.getProfileBusinessGallery(business_uid);
   }
+
+  @Get('reviews/:business_uid')
+  getBusinessReviews(@Param('business_uid') business_uid: string) {
+    return this.userpageService.getProfileBusinessReviews(business_uid);
+  }
+
+  @Get('/packages/:business_uid')
+  getBusinessPackages(@Param('business_uid') business_uid: string) {
+    return this.userpageService.getBusinessPackages(business_uid);
+  }
+
+  @Get('/package_details/:package_id')
+  getEventDetails(@Param('package_id') package_id: string) {
+    return this.userpageService.getPackageDetails(package_id);
+  }
 }

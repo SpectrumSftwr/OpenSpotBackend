@@ -61,6 +61,7 @@ model BusinessReviews {
   from                String      
   rating              Int
   comment             String
+  event_date          DateTime    @default(now())
 }
 
 model BusinessFAQs {
@@ -76,6 +77,7 @@ model BusinessPackage {
   business_id         Int         
   business            Business    @relation(fields: [business_id], references: [id])
   title               String
+  description         String?
   icon                String
   package_image_url   String
   duration_in_minutes Int    
@@ -86,6 +88,7 @@ model BusinessPackage {
 
 model Request {
   id                  Int               @id @default(autoincrement())
+  confirmationId      String            @unique
   business_id         Int         
   business            Business          @relation(fields: [business_id], references: [id])
 
@@ -108,6 +111,7 @@ enum RequestStatusEnum {
 
 model BookingDetails {
   id                  Int               @id @default(autoincrement())
+  confirmationId      String            @unique
   business_id         Int         
   business            Business          @relation(fields: [business_id], references: [id])
   event_date          DateTime
@@ -115,6 +119,7 @@ model BookingDetails {
   guest_count         Int
   duration_in_minutes Int
   event_type          String
+  personal_details    Json
 
   package_id          Int         
   package             BusinessPackage   @relation(fields: [package_id], references: [id])
