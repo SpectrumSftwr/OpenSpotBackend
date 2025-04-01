@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "BusinessReviews" ADD COLUMN     "event_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
