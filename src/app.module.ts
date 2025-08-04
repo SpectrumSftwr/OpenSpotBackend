@@ -8,6 +8,14 @@ import { UserpageModule } from './userpage/userpage.module';
 import { EventsModule } from './events/events.module';
 import { ProviderModule } from './provider/provider.module';
 import { TemplateBuilderModule } from './template-builder/template-builder.module';
+import { EventBusService } from './event-bus/event-bus.service';
+import { EventBusModule } from './event-bus/event-bus.module';
+import { TriggersModule } from './triggers/triggers.module';
+import { WorkflowsModule } from './workflows/workflows.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { ListenersModule } from './listeners/listeners.module';
+import { WorkflowEngineModule } from './workflow-engine/workflow-engine.module';
+import { TemplateContextModule } from './template-context/template-context.module';
 
 @Module({
   imports: [
@@ -23,6 +31,14 @@ import { TemplateBuilderModule } from './template-builder/template-builder.modul
     EventsModule,
     ProviderModule,
     TemplateBuilderModule,
+    EventBusModule,
+    TriggersModule,
+    WorkflowsModule,
+    SchedulerModule,
+    ListenersModule,
+    WorkflowEngineModule,
+    TemplateContextModule,
    ],
+  providers: [EventBusService],
 })
 export class AppModule {}

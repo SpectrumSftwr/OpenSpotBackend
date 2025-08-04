@@ -1,17 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventDetails } from './dtos/EventDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BookingDetails, Business, BusinessPackage } from '@prisma/client';
-import { EmailService } from 'src/email/email.service';
-import { text } from 'stream/consumers';
-import { TemplateBuilderService } from 'src/template-builder/template-builder.service';
+import { BookingDetails } from '@prisma/client';
+import { EventBusService } from 'src/event-bus/event-bus.service';
+import { EmittableType } from 'src/event-bus/dto/EmittableContext.dto';
+import { EventContext } from 'src/triggers/dto/eventContext.dto';
+import { TemplateContextService } from 'src/template-context/template-context.service';
 
 @Injectable()
 export class EventsService {
 
   constructor(private prisma: PrismaService, 
-              private emailService: EmailService,
-              private templateBuildingService: TemplateBuilderService) {}
+              private eventBusService : EventBusService,
+              private templateContext : TemplateContextService,
+  ) {}
 
   saveNewEvent = async (eventsDto: EventDetails) : Promise<{confirmation: string}|{hasError: boolean}> => {
     const generatedConfimation = this.generateConfirmation();
@@ -37,14 +39,28 @@ export class EventsService {
         guest_count: eventsDto.guestCount,
         event_type: eventsDto.eventType,
         package_id: eventsDto.packageId,
+        start_time: eventsDto.startTime,
+        end_time: eventsDto.endTime,
         duration_in_minutes: duration_in_minutes, 
         confirmationId: generatedConfimation, 
-        personal_details: {...eventsDto.personalDetails}
+        personal_details: {
+          ...eventsDto.personalDetails
+        }
       }
     })
 
-    // Send Email To Business and User.
-    this.sendEmails(bookingDetails, generatedConfimation)
+    // Package the Event into a template object
+    const eventContext : EventContext = {
+      type: 'event.created',
+      belongsTo: businessDetails,
+      data: {
+        ...await this.templateContext.buildContext(businessDetails, bookingDetails)
+      },
+    }
+
+    // Send out the Messenger.
+    this.eventBusService.emit(EmittableType.USER_CREATED_EVENT, eventContext)
+
 
     return {
       confirmation: generatedConfimation
@@ -96,80 +112,4 @@ export class EventsService {
 
     return bookingDetails;
   }
-
-  sendEmails = async (bookingDetails: BookingDetails, confirmationId: string): Promise<boolean> => {
-    let sentPartnerEmail = false;
-    let sentClientEmail = false;
-
-    try {
-      const business = await this.prisma.business.findFirst({
-        where: {
-          id: bookingDetails.business_id
-        }
-      })
-
-      const businessPackage = await this.prisma.businessPackage.findFirst({
-        where: {
-          id: bookingDetails.package_id,
-        }
-      })
-
-      sentPartnerEmail = await this.sendNewBookingRequestEmail(business, bookingDetails, businessPackage);
-      sentClientEmail = await this.sendClientConfirmationEmail(business, bookingDetails, businessPackage, confirmationId);
-    } catch {
-      return false;
-    }
-
-    return sentPartnerEmail && sentClientEmail;
-  }
-
-
-  /**
-   * Prepares and sends a business partner the new booking request details with all client information.
-   */ 
-  sendNewBookingRequestEmail = async (business: Business, bookingDetails: BookingDetails, businessPackage: BusinessPackage) : Promise<boolean> => {
-    // To Email
-    const contactDetails = business?.contact_info as {email: string, phone: string}
-    const to = [`${business.business_UID} <${contactDetails.email}>`]
-    
-    // Subject of Email
-    const subject = "A new booking request has come from OpenSpot!"
-    
-    // Build Template
-    const htmlTemplate = await this.templateBuildingService.buildNewRequestTemplate(business, bookingDetails, businessPackage);
-
-    // TODO CREATE TEXT VERSION OF TEMPLATE
-    
-    // Send Email
-    return await this.emailService.sendEmailMessage(to, subject,"", htmlTemplate);
-  }
-
-  /**
-   *  Prepares and sends a client the confirmation of their booking request.
-   */ 
-  sendClientConfirmationEmail = async (business: Business, bookingDetails: BookingDetails, businessPackage: BusinessPackage, confirmationId: string): 
-    Promise<boolean> => {
-
-    
-    // To Email
-    const contactDetails = bookingDetails?.personal_details as {
-      firstName: string,
-      lastName: string,
-      email: string,
-    }
-
-    const to = [`${contactDetails.firstName} ${contactDetails.lastName} <${contactDetails.email}>`]
-    
-    // Subject of Email
-    const subject = "Thank you for your Booking Request!"
-    
-    // Build Template
-    const html = await this.templateBuildingService.buildNewBookingRequestEmail(business, bookingDetails, businessPackage, confirmationId);
-
-    // TODO CREATE TEXT VERSION OF TEMPLATE
-
-    // Send Email
-    return await this.emailService.sendEmailMessage(to, subject, "" , html)
-  }
-
 }

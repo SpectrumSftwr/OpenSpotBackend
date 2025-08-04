@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "BookingDetails" ALTER COLUMN "end_time" DROP DEFAULT,
+ALTER COLUMN "end_time" SET DATA TYPE TEXT,
+ALTER COLUMN "start_time" DROP DEFAULT,
+ALTER COLUMN "start_time" SET DATA TYPE TEXT;

@@ -4,128 +4,170 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+    url      = env("DATABASE_URL")
 }
 
 
 model User {
   id                  Int         @id @default(autoincrement())
-  email               String      @unique
-  password            String
-  firstName           String?
-  lastName            String?
-  stripe_id           String? 
-  created_at          DateTime    @default(now())
-  updated_at          DateTime    @updatedAt
+    email               String      @unique
+    password            String
+    firstName           String?
+    lastName            String?
+    stripe_id           String? 
+    created_at          DateTime    @default(now())
+    updated_at          DateTime    @updatedAt
 
-  business            Business?   
+    business            Business?   
+    triggers            Trigger[]
+    workflows           Workflow[]
 }
 
 model Business {
   id                  Int         @id @default(autoincrement())
-  business_UID        String      // The Businesses URL Path Identifier.
+    business_UID        String      // The Businesses URL Path Identifier.
 
-  user_id             Int         @unique
-  user                User        @relation(fields: [user_id], references: [id])
-  business_name       String
-  business_type       String
-  business_banner_url String?
-  profile_picture_url String?
-  profileDescription  String?
-  contact_info        Json?       
-  theme_id            Int         @default(1)
-  created_at          DateTime    @default(now())
-  updated_at          DateTime    @updatedAt
+    user_id             Int         @unique
+    user                User        @relation(fields: [user_id], references: [id])
+    business_name       String
+    business_type       String
+    business_banner_url String?
+    profile_picture_url String?
+    profileDescription  String?
+    contact_info        Json?       
+    theme_id            Int         @default(1)
+    created_at          DateTime    @default(now())
+    updated_at          DateTime    @updatedAt
 
-  business_gallery    BusinessGallery[]
-  business_reviews    BusinessReviews[]
-  business_faqs       BusinessFAQs[]
-  business_packages   BusinessPackage[]
-  business_request    Request[]
-  business_bookings   BookingDetails[]
+    business_gallery    BusinessGallery[]
+    business_reviews    BusinessReviews[]
+    business_faqs       BusinessFAQs[]
+    business_packages   BusinessPackage[]
+    business_request    Request[]
+    business_bookings   BookingDetails[]
+
+    triggers            Trigger[]
 
 }
 
 model BusinessGallery {
   id                  Int         @id @default(autoincrement())
-  business_id         Int         
-  business            Business    @relation(fields: [business_id], references: [id])
-  imageUrl            String
-  created_at          DateTime    @default(now())
+    business_id         Int         
+    business            Business    @relation(fields: [business_id], references: [id])
+    imageUrl            String
+    created_at          DateTime    @default(now())
 }
 
 model BusinessReviews {
   id                  Int         @id @default(autoincrement())
-  business_id         Int         
-  business            Business    @relation(fields: [business_id], references: [id])
-  from                String      
-  rating              Int
-  comment             String
-  event_date          DateTime    @default(now())
+    business_id         Int         
+    business            Business    @relation(fields: [business_id], references: [id])
+    from                String      
+    rating              Int
+    comment             String
+    event_date          DateTime    @default(now())
 }
 
 model BusinessFAQs {
   id                  Int         @id @default(autoincrement())
-  business_id         Int         
-  business            Business    @relation(fields: [business_id], references: [id])
-  question            String
-  answer              String
+    business_id         Int         
+    business            Business    @relation(fields: [business_id], references: [id])
+    question            String
+    answer              String
 }
 
 model BusinessPackage {
   id                  Int         @id @default(autoincrement())
-  business_id         Int         
-  business            Business    @relation(fields: [business_id], references: [id])
-  title               String
-  description         String?
-  icon                String
-  package_image_url   String
-  duration_in_minutes Int    
-  price               Float
-  features            String[]
-  bookings            BookingDetails[]
+    business_id         Int         
+    business            Business    @relation(fields: [business_id], references: [id])
+    title               String
+    description         String?
+    icon                String
+    package_image_url   String
+    duration_in_minutes Int    
+    price               Float
+    features            String[]
+    bookings            BookingDetails[]
 }
 
 model Request {
   id                  Int               @id @default(autoincrement())
-  confirmationId      String            @unique
-  business_id         Int         
-  business            Business          @relation(fields: [business_id], references: [id])
+    confirmationId      String            @unique
+    business_id         Int         
+    business            Business          @relation(fields: [business_id], references: [id])
 
-  booking_id          Int         
-  booking             BookingDetails    @relation(fields: [booking_id], references: [id])
+    booking_id          Int         
+    booking             BookingDetails    @relation(fields: [booking_id], references: [id])
 
-  status              RequestStatusEnum @default(PENDING)
+    status              RequestStatusEnum @default(PENDING)
 
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
+    created_at          DateTime          @default(now())
+    updated_at          DateTime          @updatedAt
 }
 
 enum RequestStatusEnum {
   PENDING
-  APPROVED
-  PAID
-  REJECTED
+    APPROVED
+    PAID
+    REJECTED
 }
 
 
 model BookingDetails {
   id                  Int               @id @default(autoincrement())
-  confirmationId      String            @unique
-  business_id         Int         
-  business            Business          @relation(fields: [business_id], references: [id])
-  event_date          DateTime
-  location            String
-  guest_count         Int
-  duration_in_minutes Int
-  event_type          String
-  personal_details    Json
+    confirmationId      String            @unique
+    business_id         Int         
+    business            Business          @relation(fields: [business_id], references: [id])
+    event_date          DateTime 
+    location            String
+    guest_count         Int
+    duration_in_minutes Int
+    start_time          String
+    end_time            String
+    event_type          String
+    personal_details    Json
 
-  package_id          Int         
-  package             BusinessPackage   @relation(fields: [package_id], references: [id])
-  request             Request[]   
+    package_id          Int         
+    package             BusinessPackage   @relation(fields: [package_id], references: [id])
+    request             Request[]   
 
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
+    created_at          DateTime          @default(now())
+    updated_at          DateTime          @updatedAt
 }
 
+model Trigger {
+    id                  Int               @id @default(autoincrement())
+
+    type                TriggerTypes      
+    eventType           String?
+    condition           Json?
+    workflowId          Int
+    workflow            Workflow          @relation(fields: [workflowId], references: [id])
+
+    createdByUserId     Int?
+    createdByUser       User?                @relation(fields: [createdByUserId], references: [id])
+
+    business_id         Int
+    business            Business                @relation(fields: [business_id], references: [id])
+    created_at          DateTime    @default(now())
+}
+
+enum TriggerTypes {
+    USER_BASED
+    TIME_BASED
+}
+
+model Workflow {
+  id                  Int                 @id @default(autoincrement())
+    trigger             Trigger[]
+    name                String
+    steps               Json[]
+    createdByUserId     Int?
+    createdByUser       User?                @relation(fields: [createdByUserId], references: [id])
+}
+
+model Templates {
+  id                  Int                 @id @default(autoincrement())
+  templateString      String
+  templateHtmlString  String?
+}

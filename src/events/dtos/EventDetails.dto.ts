@@ -11,7 +11,7 @@ export class EventDetails {
 }
 
 
-class PersonalDetailsContextDto {
+export class PersonalDetailsContextDto {
   firstName: string;
   lastName: string;
   phone: string;

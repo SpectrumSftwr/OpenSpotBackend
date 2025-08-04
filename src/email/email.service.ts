@@ -21,22 +21,25 @@ export class EmailService {
     })
   }
 
-  sendEmailMessage = async (to: string[], subject: string, text:string, html: string | null) : Promise<boolean> => {
+  sendEmailMessage = async (from: string, to: string, subject: string, text:string, html: string | null) : Promise<boolean> => {
     try {
-      await this.mailgunClient.messages.create("sandboxc766a37a69514823bdc49f561154a502.mailgun.org", {
-        from: "Mailgun Sandbox <postmaster@sandboxc766a37a69514823bdc49f561154a502.mailgun.org>",
-        to: to,
+      const request = {
+        from: from,
+        to: [to],
         subject: subject,
         text: text,
-        html: html 
-      });
+        html: html,
+      }
+
+      console.log("EMAIL REQUEST:")
+      console.log(request)
+
+      await this.mailgunClient.messages.create("notifications.openspotapp.com", request);
 
       return true;
     } catch (error) {
-      Logger.error(error); //logs any error
+      Logger.error("[EmailService] Something Went Wrong while sending the email:", error); //logs any error
       return false;
     }
-
-    return;
   }
 }

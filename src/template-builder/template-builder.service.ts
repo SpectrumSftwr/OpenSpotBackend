@@ -1,84 +1,49 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BookingDetails, Business, BusinessPackage } from '@prisma/client';
-import { promises as fs } from 'fs'
-import * as Mustache from 'mustache'
-import * as path from 'path'
+import { TTemplateVarContext } from 'src/common/constants/template.constants';
+import { PrismaService } from 'src/prisma/prisma.service';
+import Handlebars from 'handlebars';
 
 @Injectable()
 export class TemplateBuilderService {
+  constructor(
+    private prisma: PrismaService,
+  ){}
 
-  private templatesDirectory = path.join(__dirname, '../../templates')
+  /**
+   * Fetches and builds a template from the id and context.
+   */
+  async buildTemplate(templateStringId: number, context: TTemplateVarContext) 
+    : Promise<{text: string, html: string}>{
 
-  async loadTemplate(fileName: string) : Promise<string> {
+    const templateString = await this.prisma.templates.findFirst({
+      where:{
+        id: Number(templateStringId)
+      }
+    })
+
+    Logger.log(`Compiling Templates For Template ${templateStringId}`);
 
     try {
-      const filePath = path.join(this.templatesDirectory, fileName);
-      return await fs.readFile(filePath, 'utf-8');
-    } catch (error) {
-      Logger.error("Error Loading the templates:", error)
-      return null;
-    }
-  }
+      console.log("This is the Context when building the template");
+      console.log(context);
 
-  async buildNewRequestTemplate(business: Business, bookingDetails: BookingDetails, requestPackage: BusinessPackage) : Promise<string> {
-    const template = await this.loadTemplate('new_booking_request.html');
-    const clientDetails = bookingDetails.personal_details as {
-      firstName: string,
-      lastName: string,
-      email: string,
-      phone: string,
-      comments: string,
-    };
+      const htmlTemplate = Handlebars.compile(templateString.templateHtmlString);
+      const html =  htmlTemplate(context);
+      Logger.log("Completed HTML Template Building")
 
-    const data = {
-      client_name: `${clientDetails.firstName} ${clientDetails.lastName}`,
-      provider_name: business.business_name,
-      event_type: bookingDetails.event_type,
-      event_date: bookingDetails.event_date.toDateString(),
-      event_duration: bookingDetails.duration_in_minutes ,
-      event_venue: bookingDetails.location,
-      guest_count: bookingDetails.guest_count,
-      client_phone: clientDetails.phone,
-      client_email: clientDetails.email,
-      client_notes: clientDetails.comments,
-      your_name: "Juan Mejia",
-      your_business_name: "OpenSpot",
-      your_contact_email: "Jmejia@OpenSpot.com",
-      package: requestPackage.title
-    };
+      const plainTextTemplate = Handlebars.compile(templateString.templateString);
+      const text = plainTextTemplate(context);
+      Logger.log("Completed Text Template Building")
 
-    const htmlOutput = Mustache.render(template, data);
+      return {
+        text: text,
+        html: html,
+      }
 
-    return htmlOutput;
-  }
-
-  async buildNewBookingRequestEmail(business: Business, bookingDetails: BookingDetails, requestPackage: BusinessPackage, confirmation_number: string) 
-    : Promise<string> {
-    const template = await this.loadTemplate('request_confirmation.html');
-
-    const clientDetails = bookingDetails.personal_details as {
-      firstName: string,
-    };
-
-    const openspot_contact_info = business.contact_info as {
-
+    } catch(err) {
+      Logger.error("Unable To Build Tempalte Contents for Event Action", err);
     }
 
-    const data = {
-      confirmation_number: confirmation_number,
-      client_name: clientDetails.firstName ,
-      event_date: bookingDetails.event_date.toDateString(),
-      event_type: bookingDetails.event_type,
-      provider_name: business.business_name,
-      openspot_contact_info: "help@OpenSpot.com",
-      your_full_name: "Juan Mejia",
-      your_title: "OpenSpot Founder",
-      email_address: "Jmejia@OpenSpot.com",
-      website_url: "https://OpenSpot.com"
-    }
-
-    const htmlOutput = Mustache.render(template, data);
-
-    return htmlOutput;
+    return null;
   }
 }
