@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ProfileDetails } from './dto/ProfileDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Business } from '@prisma/client';
+import { Business, BusinessGallery } from '@prisma/client';
 import { ReviewBreakdownDto } from './dto/ReviewBreakdown.dto';
 import { Filters } from 'src/common/dto/filters.dto';
 import { PackageDto } from './dto/Package.dto';
+import { UserStorageService } from 'src/user-storage/user-storage.service';
 
 @Injectable()
 export class UserpageService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private userStorageService: UserStorageService,
+  ) {}
 
   /**
    * Get The Main Profile Business details.
@@ -41,7 +45,7 @@ export class UserpageService {
 
     let reviewsBreakdown = await this.getReviewBreakdown(businessDetails);
 
-    return this.buildProfileDetailsDto(businessDetails, 
+    return await this.buildProfileDetailsDto(businessDetails, 
                                        totalReview, 
                                        reviewAverage._avg.rating, 
                                        reviewsBreakdown);
@@ -103,13 +107,16 @@ export class UserpageService {
   /**
    * Builds the profile details object from the inputed paramters.
    */
-  buildProfileDetailsDto(business: Business, totalReview: number, reviewAverage: number, reviewsBreakdown: ReviewBreakdownDto) 
-    : ProfileDetails {
+  async buildProfileDetailsDto(business: Business, totalReview: number, reviewAverage: number, reviewsBreakdown: ReviewBreakdownDto) 
+    : Promise<ProfileDetails> {
+      const profilePictureSignedUrl = await this.userStorageService.getSignedUrl(business.profile_picture_url);
+      const bannerPicUrl = await this.userStorageService.getSignedUrl(business.business_banner_url);
+
       return {
         business_name: business.business_name,
         business_type: business.business_type,
-        profilePicUrl: business.profile_picture_url,
-        bannerPicUrl: business.business_banner_url,
+        profilePicUrl: profilePictureSignedUrl,
+        bannerPicUrl: bannerPicUrl,
         description: business.profileDescription,
         totalReviews: totalReview,
         overallRating: reviewAverage,
@@ -145,6 +152,7 @@ export class UserpageService {
      * Gets the Business Gallery Preview of 8 Images.
      */
     async getProfileBusinessGalleryPreview(businessName: string): Promise<any> {
+
       let businessDetails = await this.prisma.business.findFirst({where: {
         business_UID: businessName,
       }})
@@ -166,7 +174,38 @@ export class UserpageService {
         }
       })
 
+      // generateSigned urls if not present or if url is expired.
+      imageUrls = await this.validateCachedUrls(imageUrls)
       return imageUrls;
+    }
+
+    async validateCachedUrls(images: BusinessGallery[]) : Promise<BusinessGallery[]> {
+      const results : BusinessGallery[] = [];
+
+      for (let image of images) {
+        
+        // If the Presigned URL does not exist or the url has expired Regenerate the URL.
+        if (!image.presignedUrl || image.expiresAt < new Date()){
+          const updatedPreSignedUrl = await this.userStorageService.getSignedUrl(image.imageUrl);
+          const now = new Date();
+          const updatedExpireryDate = new Date(now);
+          updatedExpireryDate.setMinutes(now.getMinutes() + 30);
+
+          image = await this.prisma.businessGallery.update({
+            where: {
+              id: image.id
+            },
+            data: {
+              presignedUrl: updatedPreSignedUrl,
+              expiresAt: updatedExpireryDate 
+            }
+          })
+        }
+
+        results.push(image);
+      }
+
+      return results;
     }
 
     /**
@@ -193,6 +232,7 @@ export class UserpageService {
         }
       })
 
+      imageUrls = await this.validateCachedUrls(imageUrls);
       return imageUrls;
     }
 

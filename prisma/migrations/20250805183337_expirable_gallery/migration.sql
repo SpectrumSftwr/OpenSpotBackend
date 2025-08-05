@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "BusinessGallery" ADD COLUMN     "expiresAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

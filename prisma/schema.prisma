@@ -51,10 +51,12 @@ model Business {
 }
 
 model BusinessGallery {
-  id                  Int         @id @default(autoincrement())
+    id                  Int         @id @default(autoincrement())
     business_id         Int         
     business            Business    @relation(fields: [business_id], references: [id])
-    imageUrl            String
+    imageUrl            String      
+    presignedUrl        String      @default("")
+    expiresAt           DateTime    @default(now())
     created_at          DateTime    @default(now())
 }
 
