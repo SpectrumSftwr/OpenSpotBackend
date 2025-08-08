@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt'
 @Injectable()
 export default class UserService{
 
+
+
   constructor(private prisma: PrismaService) {}
 
   /**

@@ -17,6 +17,7 @@ import { ListenersModule } from './listeners/listeners.module';
 import { WorkflowEngineModule } from './workflow-engine/workflow-engine.module';
 import { TemplateContextModule } from './template-context/template-context.module';
 import { UserStorageModule } from './user-storage/user-storage.module';
+import { BusinessModule } from './business/business.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { UserStorageModule } from './user-storage/user-storage.module';
     WorkflowEngineModule,
     TemplateContextModule,
     UserStorageModule,
+    BusinessModule,
    ],
   providers: [EventBusService],
 })

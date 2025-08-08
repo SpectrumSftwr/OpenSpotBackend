@@ -21,7 +21,9 @@ export class SchedulerService {
   /**
    * Method to reload all triggers and workflows daily before triggers are all run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_NOON) // NOTE:  Cron = every hour at exactly the hour
+  @Cron(CronExpression.EVERY_DAY_AT_NOON, {
+    name: "reload-triggers-cron-job"
+  }) // NOTE:  Cron = every hour at exactly the hour
   async reloadTriggers() {
     await this.triggerService.reloadTriggers();
     await this.workflowsService.reloadTriggers()
@@ -31,7 +33,9 @@ export class SchedulerService {
   /**
    * Method to Run All triggers that need to be run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_1PM) 
+  @Cron(CronExpression.EVERY_DAY_AT_1PM, {
+    name: "run-triggers-cron-job"
+  }) 
   async checkTimeTriggers() {
 
     Logger.log("[SchedulerService.checkTimeTriggers] Starting Up Time Triggers.")
