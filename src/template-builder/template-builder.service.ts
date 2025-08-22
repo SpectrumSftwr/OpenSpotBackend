@@ -24,9 +24,6 @@ export class TemplateBuilderService {
     Logger.log(`Compiling Templates For Template ${templateStringId}`);
 
     try {
-      console.log("This is the Context when building the template");
-      console.log(context);
-
       const htmlTemplate = Handlebars.compile(templateString.templateHtmlString);
       const html =  htmlTemplate(context);
       Logger.log("Completed HTML Template Building")

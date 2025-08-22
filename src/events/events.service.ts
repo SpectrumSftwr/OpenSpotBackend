@@ -49,6 +49,15 @@ export class EventsService {
       }
     })
 
+    await this.prisma.request.create({
+      data: {
+        confirmationId: generatedConfimation,
+        business_id: businessDetails.id,
+        booking_id: bookingDetails.id,
+        status: "PENDING"
+      }
+    })
+
     // Package the Event into a template object
     const eventContext : EventContext = {
       type: 'event.created',

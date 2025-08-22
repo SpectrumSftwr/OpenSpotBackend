@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { ConflictException, Injectable, Logger } from "@nestjs/common";
 import { User } from "@prisma/client";
 import { NewUserDto } from "src/auth/dto";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -7,8 +7,6 @@ import * as bcrypt from 'bcrypt'
 @Injectable()
 export default class UserService{
 
-
-
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -16,15 +14,26 @@ export default class UserService{
    */
   async findOne(email: string): Promise<User>  {
     // Do a search for the Username.
-    const result = await this.prisma.user.findUnique({
-      where: {
-         email: email.toLowerCase() 
-      }
-    });
+    try {
+      const result = await this.prisma.user.findFirst({
+        where: {
+          email: {
+            equals: email,
+            mode: "insensitive"
+          }
+        }
+      });
+      return result;
+    } catch (err) {
+      Logger.log("Unable to find a user with email provided");
+      throw Error("Failed to find a user with the given email");
+    }
 
-    return result;
   }
 
+  /**
+   * Creates a new User.
+   */
   async createNewUser(userInfo: NewUserDto): Promise<User> {
     const saltRounds = 10;
     const hash = await bcrypt.hash(userInfo.password, saltRounds);
@@ -36,10 +45,6 @@ export default class UserService{
           firstName: userInfo.firstName,
           lastName: userInfo.lastName,
         }
-    }).then((response) => { 
-      return response;
-    }).catch(() =>  {
-      throw new ConflictException("Could not create user.");
     })
 
     return results;

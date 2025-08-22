@@ -44,8 +44,6 @@ export class WorkflowEngineService {
       }
     }
 
-    console.log("Step updated");
-    console.log(step);
     return step;
   }
 

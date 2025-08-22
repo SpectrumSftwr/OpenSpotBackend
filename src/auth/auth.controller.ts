@@ -15,7 +15,7 @@ export class AuthController {
     *  Endpoint: Login.
     */
    @Post('login')
-   async login(@Body() {email, password} : {email:string,password: string}) {
+   async login(@Body() {email, password} : {email:string,password: string}) : Promise<UserDto> {
      return await this.authService.authenticateUser({email, password})
 
    }

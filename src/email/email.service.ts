@@ -31,9 +31,6 @@ export class EmailService {
         html: html,
       }
 
-      console.log("EMAIL REQUEST:")
-      console.log(request)
-
       await this.mailgunClient.messages.create("notifications.openspotapp.com", request);
 
       return true;

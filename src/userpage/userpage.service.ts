@@ -19,10 +19,11 @@ export class UserpageService {
    * Get The Main Profile Business details.
    */
   async getProfileBusinessDetails(businessName: string) : Promise<ProfileDetails | {hasError: boolean}> {
-
-
     let businessDetails = await this.prisma.business.findFirst({where: {
-      business_UID: businessName,
+      business_UID: {
+        equals: businessName,
+        mode: "insensitive"
+      }
     }})
 
     if (businessDetails == null) {

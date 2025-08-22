@@ -73,7 +73,9 @@ export class TriggersService {
       for (const event of bookingDetails)  {
         switch (triggerCondition.type) {
           case 'time-offset':
-            if(this.shouldTriggerByTime(event, triggerCondition)) {
+            // TODO: Make this so that a user can choose what status the event should be in. SEE GPT RESULTS.
+            if(this.shouldTriggerByTime(event, triggerCondition) 
+               && await this.isEventAcceptedStatus(event)) {
             results.push({
               trigger: trigger,
               event: event,
@@ -115,7 +117,20 @@ export class TriggersService {
     const msInDay = 1000 * 60 * 60 * 24;
 
     const diff = (Math.floor(diffIfMS / msInDay) == triggerCondition.offsetDays) 
-    return diff;
+    return diff; 
+  }
+
+  /**
+   * Checks if the event is in a accepted status.
+   */
+  private async isEventAcceptedStatus(event: BookingDetails) {
+    const eventStatus = await this.prismaService.request.findFirst({
+      where: {
+        booking_id: event.id,
+      }
+    })
+
+    return eventStatus.status == "APPROVED";
   }
 
 
