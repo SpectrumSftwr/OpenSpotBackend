@@ -46,7 +46,7 @@ export class BusinessService {
     return await this.prisma.business.create({data: {
       business_UID: businessRequestBody.businessUsername,
       business_name: businessRequestBody.businessName,
-      profileDescription: businessRequestBody.profileDescription, 
+      profileDescription: businessRequestBody.description, 
       profile_picture_url: '',
       business_banner_url: '',
       business_type: businessRequestBody.businessType,
@@ -73,8 +73,7 @@ export class BusinessService {
     }
   }
 
-  async doesUserHaveBusiness(userId: number) :Promise<boolean> {
-    let results = false
+  async findBusinessByUserId(userId: number): Promise<Business> {
     try {
       const business = await this.prisma.business.findFirst({where: {
         user_id: {
@@ -82,15 +81,19 @@ export class BusinessService {
         }
       }})
 
-      // IDK IF THIS IS GOOD
-      results = business && true
-
+      return business;
     } catch (err) {
       Logger.log("Error Could not find Business With user ID" + userId)
     }
 
-    return results;
+    return null;
+  }
 
+  /**
+   * Checks if any business exists for a user.
+   */
+  async doesUserHaveBusiness(userId: number) :Promise<boolean> {
+    return await this.findBusinessByUserId(userId) != null;
   }
 
 }

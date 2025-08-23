@@ -98,13 +98,17 @@ model Request {
     business_id         Int         
     business            Business          @relation(fields: [business_id], references: [id])
 
-    booking_id          Int         
+    booking_id          Int               @unique
     booking             BookingDetails    @relation(fields: [booking_id], references: [id])
 
     status              RequestStatusEnum @default(PENDING)
 
     created_at          DateTime          @default(now())
     updated_at          DateTime          @updatedAt
+}
+
+model BookingRequestHistory {
+    id                  Int               @id @default(autoincrement())
 }
 
 enum RequestStatusEnum {
@@ -131,7 +135,7 @@ model BookingDetails {
 
     package_id          Int         
     package             BusinessPackage   @relation(fields: [package_id], references: [id])
-    request             Request[]   
+    request             Request?
 
     created_at          DateTime          @default(now())
     updated_at          DateTime          @updatedAt

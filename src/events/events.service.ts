@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventDetails } from './dtos/EventDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BookingDetails } from '@prisma/client';
+import { BookingDetails, Business, User, Request } from '@prisma/client';
 import { EventBusService } from 'src/event-bus/event-bus.service';
 import { EmittableType } from 'src/event-bus/dto/EmittableContext.dto';
 import { EventContext } from 'src/triggers/dto/eventContext.dto';
 import { TemplateContextService } from 'src/template-context/template-context.service';
+import { BusinessService } from 'src/business/business.service';
+import { GetUserEventsDto } from './dtos/GetUserEventsDto.dto';
 
 @Injectable()
 export class EventsService {
@@ -13,12 +15,13 @@ export class EventsService {
   constructor(private prisma: PrismaService, 
               private eventBusService : EventBusService,
               private templateContext : TemplateContextService,
+              private businessService: BusinessService,
   ) {}
 
   saveNewEvent = async (eventsDto: EventDetails) : Promise<{confirmation: string}|{hasError: boolean}> => {
     const generatedConfimation = this.generateConfirmation();
 
-    let businessDetails = await this.prisma.business.findFirst({where: {
+    let businessDetails : Business = await this.prisma.business.findFirst({where: {
       business_UID: eventsDto.business_uid,
     }})
 
@@ -120,5 +123,62 @@ export class EventsService {
     Logger.log(`Booking details for: ${confirmationId} found`)
 
     return bookingDetails;
+  }
+
+  /**
+   * Finds all Events that fit a given Filter Dto.
+   * @param user - The user who is making the request.
+   * @param query - The query parameters.
+   */
+  async findAllEventsWithFilter(user: User, query: GetUserEventsDto) {
+    const { page, pageSize, sort, status } = query;
+
+    // Pagination Math
+    const skip = (page - 1) * pageSize;
+    const take = Number(pageSize);
+    // Sorting 
+    let orderBy : any = { created_at: 'desc' }
+    if (sort) {
+      const [field, direction] = sort.split(',')
+      orderBy = {[field]: direction.toLowerCase() === 'asc' ? 'asc': 'desc'}
+    }
+
+
+   const business = await this.businessService.findBusinessByUserId(user.id)
+   const businessID =  business.id
+
+   const where : any = { 
+     business_id : businessID,
+   };
+
+   if (status) {
+     where.request = { status };
+   }
+
+   console.log("Where Clause") 
+   console.log(where) 
+    
+    const [items, total]= await Promise.all([
+      this.prisma.bookingDetails.findMany({
+        where, 
+        skip: skip, 
+        take, 
+        orderBy,
+        include: {
+          request: true,
+        }
+      }) ,
+      this.prisma.bookingDetails.count({where}),
+    ])
+    
+    return {
+      data: items, 
+      meta: {
+        page, 
+        pageSize,
+        total,
+        totalPages: Math.ceil(total/pageSize)
+      }
+    }
   }
 }
