@@ -116,6 +116,7 @@ enum RequestStatusEnum {
     APPROVED
     PAID
     REJECTED
+    COMPLETED
 }
 
 
@@ -136,6 +137,7 @@ model BookingDetails {
     package_id          Int         
     package             BusinessPackage   @relation(fields: [package_id], references: [id])
     request             Request?
+    eventNotes          EventNotes?
 
     created_at          DateTime          @default(now())
     updated_at          DateTime          @updatedAt
@@ -176,4 +178,14 @@ model Templates {
   id                  Int                 @id @default(autoincrement())
   templateString      String
   templateHtmlString  String?
+}
+
+model EventNotes {
+  id                  Int                 @id @default(autoincrement())
+  booking_id          Int               @unique
+  booking             BookingDetails    @relation(fields: [booking_id], references: [id])
+
+  // Encoded Notes as base 64 for compression.
+  notes               String?
+  rejectionNotes      String?
 }

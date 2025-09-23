@@ -31,6 +31,8 @@ export class EmailService {
         html: html,
       }
 
+      Logger.log("Workflow Enginee: Sending Email")
+
       await this.mailgunClient.messages.create("notifications.openspotapp.com", request);
 
       return true;

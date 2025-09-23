@@ -21,7 +21,10 @@ export default class UserService{
             equals: email,
             mode: "insensitive"
           }
-        }
+        },
+        include: {
+          business: true
+        },
       });
       return result;
     } catch (err) {

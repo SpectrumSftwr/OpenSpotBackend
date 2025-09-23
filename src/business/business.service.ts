@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Business, User } from '@prisma/client';
 import { error } from 'console';
-import { request } from 'http';
-import { catchError } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()

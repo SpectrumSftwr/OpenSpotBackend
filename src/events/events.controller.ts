@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { EventDetails } from './dtos/EventDetails.dto';
 import { EventsService } from './events.service';
-import { Record } from '@prisma/client/runtime/library';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { query, Request } from 'express';
-import { User } from '@prisma/client';
+import { Request } from 'express';
+import { RequestStatusEnum, User, Request as PrismaRequest } from '@prisma/client';
 import { GetUserEventsDto } from './dtos/GetUserEventsDto.dto';
+import { EventsStatisticsDto } from './dtos/EventsStatisticsDto.dto';
 
 @Controller('events')
 export class EventsController {
@@ -17,10 +17,6 @@ export class EventsController {
     return await this.eventsService.saveNewEvent(eventDto)
   }
 
-  @Get('/:confirmationId')
-  async getEventDetails(@Param('confirmationId') confirmationId: string) {
-    return await this.eventsService.getBookingDetails(confirmationId);
-  }
 
   /**
    * This Endpoint will be responsible for fetching all events that will be displayed by the
@@ -33,5 +29,50 @@ export class EventsController {
   @UseGuards(JwtAuthGuard)
   async findAllEventsWithFilter(@Query() query: GetUserEventsDto, @Req() req: Request) {
     return await this.eventsService.findAllEventsWithFilter(req.user as User, query);
+  }
+
+  /**
+   * Responsible for getting counts and statistics based on event statuses
+   * @returns a EventStatusDTO object.
+   */
+  @Get('/stats')
+  @UseGuards(JwtAuthGuard)
+  async getAllEventStatistics(@Req() req: Request) : Promise<EventsStatisticsDto>{
+    return await this.eventsService.buildUserEventsStatistics(req.user as User);
+  }
+
+  @Get('/:confirmationId')
+  async getEventDetails(@Param('confirmationId') confirmationId: string) {
+    return await this.eventsService.getBookingDetails(confirmationId);
+  }
+
+  /**
+   * Responsible for getting counts and statistics based on event statuses
+   * @param reqBody {
+   *    confirmationID: string REQUIRED,
+   *    status: RequestStatusEnum REQUIRED,
+   * }
+   * @returns a EventStatusDTO object.
+   */
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async updateEventStatus(@Body() reqBody: any) : Promise<PrismaRequest>{
+
+    const confirmationID : string = reqBody.confirmationID;
+    const status : RequestStatusEnum = reqBody.status;
+    const requestNotes: string = reqBody.notes;
+    const rejectionReason : string = reqBody.rejectionReason;
+
+    return await this.eventsService.updateEventStatus(confirmationID, status, requestNotes, rejectionReason);
+  }
+
+  @Post("/notes") 
+  @UseGuards(JwtAuthGuard)
+  async updateNotes(@Body() reqBody: any) {
+    const confirmationID : string = reqBody.confirmationID;
+    const requestNotes: string = reqBody.notes;
+    const rejectionReason : string = reqBody.rejectionReason;
+
+    await this.eventsService.updateNotes(confirmationID, requestNotes, rejectionReason);
   }
 }

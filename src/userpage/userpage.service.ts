@@ -42,6 +42,9 @@ export class UserpageService {
       _avg: {
         rating: true,
       },
+      where: {
+        business_id: businessDetails.id
+      }
     })
 
     let reviewsBreakdown = await this.getReviewBreakdown(businessDetails);
@@ -130,7 +133,10 @@ export class UserpageService {
      */
     async getProfileBusinessFaqs(businessName: string): Promise<any> {
       let businessDetails = await this.prisma.business.findFirst({where: {
-        business_UID: businessName,
+          business_UID: {
+            equals: businessName,
+            mode: "insensitive"
+          }
       }})
 
 
@@ -155,7 +161,10 @@ export class UserpageService {
     async getProfileBusinessGalleryPreview(businessName: string): Promise<any> {
 
       let businessDetails = await this.prisma.business.findFirst({where: {
-        business_UID: businessName,
+          business_UID: {
+            equals: businessName,
+            mode: "insensitive"
+          }
       }})
 
 
@@ -214,7 +223,10 @@ export class UserpageService {
      */
     async getProfileBusinessGallery(businessName: string): Promise<any> {
       let businessDetails = await this.prisma.business.findFirst({where: {
-        business_UID: businessName,
+          business_UID: {
+            equals: businessName,
+            mode: "insensitive"
+          }
       }})
 
 
@@ -243,7 +255,10 @@ export class UserpageService {
     async getProfileBusinessReviews(businessName: string): Promise<any> {
 
       let businessDetails = await this.prisma.business.findFirst({where: {
-        business_UID: businessName,
+          business_UID: {
+            equals: businessName,
+            mode: "insensitive"
+          }
       }})
 
 
@@ -273,7 +288,10 @@ export class UserpageService {
     async getBusinessPackages(businessName: string): Promise<PackageDto[]|{hasError:boolean}> {
 
       let businessDetails = await this.prisma.business.findFirst({where: {
-        business_UID: businessName,
+          business_UID: {
+            equals: businessName,
+            mode: "insensitive"
+          }
       }})
 
 
@@ -311,6 +329,10 @@ export class UserpageService {
           id: parseInt(packageId)
         }
       })
+
+      if (!pkg) {
+        throw Error("No Package Details found with given ID");
+      }
 
       let convertedPackages = {
           id: pkg.id,
