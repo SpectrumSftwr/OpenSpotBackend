@@ -1,3 +1,5 @@
+import { PackageItemOnPackage } from "@prisma/client";
+
 export class PackageDto {
   id: number;
   icon: string;

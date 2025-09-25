@@ -6,6 +6,8 @@ import { WorkflowsService } from 'src/workflows/workflows.service';
 import { EmittableType } from 'src/event-bus/dto/EmittableContext.dto';
 import { TemplateContextService } from 'src/template-context/template-context.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { type } from 'os';
+import { EventContext } from 'src/triggers/dto/eventContext.dto';
 
 @Injectable()
 export class SchedulerService {
@@ -48,7 +50,12 @@ export class SchedulerService {
         user_id: trigger.createdByUserId,
       }})
 
-      let context = await this.templateContextService.buildContext(business, event);
+      let context : EventContext = {
+        type: trigger.type,
+        belongsTo: business, 
+        data: await this.templateContextService.buildContext(business, event),
+      }
+
 
       this.eventBus.emit(EmittableType.SCHEDULED_TRIGGER_EVENT , {trigger, context});
     }

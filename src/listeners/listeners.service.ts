@@ -21,8 +21,6 @@ export class TriggerListener {
 
   async handleEvent(context: EventContext) {
     const matchingTriggers = await this.triggerService.evaluateTriggers(context);
-    Logger.warn("Listeners Firing USER ACTION: ")
-    Logger.warn(matchingTriggers)
     for (const trigger of matchingTriggers) {
       await this.workflowService.executeWorkflow(trigger.workflowId, context);
     }

@@ -4,11 +4,14 @@ import { AuthService } from './auth.service';
 import { NewUserDto, UserDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { Request } from 'express';
+import { BusinessService } from 'src/business/business.service';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
 
    constructor(private userService: UserService, 
+               private businessService: BusinessService,
                private authService: AuthService) {}
 
    /**
@@ -35,6 +38,14 @@ export class AuthController {
    @Get('status') 
    @UseGuards(JwtAuthGuard)
    async getJwtStatus(@Req() req: Request){
-      return req.user
+     const user = req.user as User;
+
+      // get user with business
+      const business = await this.businessService.findBusinessByUserId(user.id);
+
+      return {
+        user: req.user,
+        business: business,
+      }
    }
 }

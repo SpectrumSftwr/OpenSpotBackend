@@ -18,8 +18,14 @@ export interface FieldEqualsCondition {
   value: string | number | boolean;
 }
 
+export interface LogicalCondition {
+  type : 'and' | "or";
+  conditions: TriggerCondition[]
+}
+
 export type TriggerCondition =
   | TimeCondition
   | FieldInCondition
   | FieldEqualsCondition
+  | LogicalCondition
 

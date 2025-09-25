@@ -34,23 +34,12 @@ export class WorkflowEngineService {
    * Email/SMS/Notification Content.
    */
   private render(step: WorkflowStep, context: any) : WorkflowStep {
-    Logger.log("This is the Context When In the Steps")
-    Logger.log(context.data);
-
     for (const key in step) {
-      Logger.log("This is the next step key that is being rendered")
-      Logger.log(key);
-
       try {
         const stepKey = step[key];
 
-        Logger.log("This is the current value in the Step Key")
-        Logger.log(step[key]);
-
         const template = Handlebars.compile(stepKey.toString());
         step[key] = template(context.data);
-        Logger.log("This is the rendered step")
-        Logger.log(step[key]);
       } catch (err) {
         Logger.error("[WorkflowEngineService] Unable to compile template using handlebars:", err)
       }
@@ -62,7 +51,7 @@ export class WorkflowEngineService {
   private async runStep(step: WorkflowStep, context: any) {
     switch(step.action) {
       case WorkflowAction.SEND_EMAIL: 
-        const { text, html } = await this.templateService.buildTemplate(step.templateId, context)
+        const { text, html } = await this.templateService.buildTemplate(step.templateId, context.data)
         return this.emailService.sendEmailMessage(step.from, step.to, step.subject, text, html);
 
       default: 

@@ -44,13 +44,13 @@ export class BusinessController {
      const business : Business = await this.businessService.createBusiness(body, user?.id);
 
      // Upload Images to S3 Bucket
-     const profilePictureS3Key = await this.userStorageService.uploadImage(profilePicture[0], `assets/business/${business.id}/`)
-     const bannerPictureS3Key = await this.userStorageService.uploadImage(bannerPicture[0], `assets/business/${business.id}/`)
+     const profilePictureS3Key = await this.userStorageService.uploadImage(profilePicture[0], `assets/business/${business.id}`)
+     const bannerPictureS3Key = await this.userStorageService.uploadImage(bannerPicture[0], `assets/business/${business.id}`)
 
      // Update Business With the Uploaded Image Keys. 
      const success = await this.businessService.updateBusiness(business.id, 'profile_picture_url', profilePictureS3Key) 
                       && await this.businessService.updateBusiness(business.id, 'business_banner_url', bannerPictureS3Key);
      
-     
+     return success;
    }
 }

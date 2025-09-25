@@ -34,14 +34,17 @@ export class BusinessService {
 
     Logger.log(`Creating a New Business Associated with User ${userId}`)
 
+    console.log(businessRequestBody);
+
     const contactInfo = {
       phone: businessRequestBody.phone,
       email: businessRequestBody.email,
       state: businessRequestBody.state,
-      city: businessRequestBody.city,
+      city: businessRequestBody.city
     }
+    console.log(contactInfo)
 
-    return await this.prisma.business.create({data: {
+    const businessCreationObj = {
       business_UID: businessRequestBody.businessUsername,
       business_name: businessRequestBody.businessName,
       profileDescription: businessRequestBody.description, 
@@ -51,7 +54,11 @@ export class BusinessService {
       contact_info: contactInfo,
       // Created By
       user_id: userId,
-    }})
+    }
+
+    console.log(businessCreationObj)
+
+    return await this.prisma.business.create({data: businessCreationObj})
   }
 
   async updateBusiness(businessId: number, field: string, newValue: any) {

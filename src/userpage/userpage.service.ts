@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ProfileDetails } from './dto/ProfileDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Business, BusinessGallery } from '@prisma/client';
+import { Business, BusinessGallery, BusinessPackage } from '@prisma/client';
 import { ReviewBreakdownDto } from './dto/ReviewBreakdown.dto';
 import { Filters } from 'src/common/dto/filters.dto';
 import { PackageDto } from './dto/Package.dto';
@@ -304,6 +304,15 @@ export class UserpageService {
       let dbPackages = await this.prisma.businessPackage.findMany({
         where: {
           business_id: businessDetails.id
+        },
+        include: {
+          packageFeatures: {
+            include: {
+              packageItem: {
+                select : {name: true},
+              }
+            }
+          },
         }
       })
 
@@ -315,7 +324,7 @@ export class UserpageService {
           duration: pkg.duration_in_minutes,
           price: pkg.price,
           description: pkg.description,
-          includes: pkg.features,
+          includes: pkg.packageFeatures.map(f => f.packageItem.name)
         }
       })
 
@@ -324,9 +333,19 @@ export class UserpageService {
     }
 
     async getPackageDetails(packageId: string): Promise<PackageDto|{hasError:boolean}> {
+
       let pkg = await this.prisma.businessPackage.findFirst({
         where: {
           id: parseInt(packageId)
+        },
+        include: {
+          packageFeatures: {
+            include: {
+              packageItem: {
+                select : {name: true},
+              }
+            }
+          },
         }
       })
 
@@ -341,7 +360,7 @@ export class UserpageService {
           duration: pkg.duration_in_minutes,
           price: pkg.price,
           description: pkg.description,
-          includes: pkg.features,
+          includes: pkg.packageFeatures.map(f => f.packageItem.name)
       }
 
       return convertedPackages ? convertedPackages : {hasError: true};

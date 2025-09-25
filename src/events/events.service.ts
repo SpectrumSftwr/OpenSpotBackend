@@ -194,6 +194,7 @@ export class EventsService {
 
    // Query for accepted all time.
    const upcomingAcceptedQuery = {
+        business_id: business.id,
         event_date: {
           gte: new Date(),
         },

@@ -43,7 +43,13 @@ export class TemplateContextService {
             event: {
               confirmationNumber: bookingDetails.confirmationId,
               location: bookingDetails.location,
-              date: bookingDetails.event_date.toISOString(),
+              date: bookingDetails.event_date.toLocaleDateString(
+                "en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric"
+                }
+              ),
               eventType: bookingDetails.event_type,
               duration: bookingDetails.duration_in_minutes.toString(),
               guestCount: bookingDetails.guest_count.toString(),
