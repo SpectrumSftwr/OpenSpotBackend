@@ -53,7 +53,6 @@ export class WorkflowEngineService {
       case WorkflowAction.SEND_EMAIL: 
         const { text, html } = await this.templateService.buildTemplate(step.templateId, context.data)
         return this.emailService.sendEmailMessage(step.from, step.to, step.subject, text, html);
-
       default: 
         Logger.error(`Unknownd workflow step type. skipping workflow step ${step.action}`)
     }

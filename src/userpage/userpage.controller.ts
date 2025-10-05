@@ -18,7 +18,12 @@ export class UserpageController {
 
   @Get('/faq/:business_uid')
   getFrequentlyAskedQuestions(@Param('business_uid') business_uid: string) {
-    return this.userpageService.getProfileBusinessFaqs(business_uid);
+    return this.userpageService.getProfileBusinessFaqs(business_uid, true);
+  }
+
+  @Get('/allfaq/:business_uid')
+  getAllFaqs(@Param('business_uid') business_uid: string) {
+    return this.userpageService.getProfileBusinessFaqs(business_uid, false);
   }
 
   @Get('/gallery-preview/:business_uid')

@@ -70,11 +70,11 @@ export class UserpageService {
       }
 
       return {
-        fiveStarReviews: results[0],
-        fourStarReviews: results[1],
+        fiveStarReviews: results[4],
+        fourStarReviews: results[3],
         threeStarReviews: results[2],
-        twoStarReviews: results[3],
-        oneStarReviews: results[4],
+        twoStarReviews: results[1],
+        oneStarReviews: results[0],
       }
 
     } catch {
@@ -131,12 +131,12 @@ export class UserpageService {
     /**
      * fetches a business's FAQs
      */
-    async getProfileBusinessFaqs(businessName: string): Promise<any> {
+    async getProfileBusinessFaqs(businessName: string, onlyCore : boolean): Promise<any> {
       let businessDetails = await this.prisma.business.findFirst({where: {
           business_UID: {
             equals: businessName,
             mode: "insensitive"
-          }
+          },
       }})
 
 
@@ -145,12 +145,15 @@ export class UserpageService {
           hasError: true
         };
       }
+      const where = {
+        business_id: businessDetails.id,
+      }
 
-      let faqs = await this.prisma.businessFAQs.findMany({
-        where: {
-          business_id: businessDetails.id
-        }
-      })
+      if (onlyCore) {
+        where['coreQ'] = true;
+      }
+
+      let faqs = await this.prisma.businessFAQs.findMany({where})
 
       return faqs;
     }

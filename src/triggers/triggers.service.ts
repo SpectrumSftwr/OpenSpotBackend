@@ -4,6 +4,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingDetails, Trigger, TriggerTypes } from '@prisma/client';
 import { FieldEqualsCondition, FieldInCondition, LogicalCondition, TimeCondition, TriggerCondition } from './dto/triggerCondition.dto';
 import { every } from 'rxjs';
+import { BookingDetailsWithRequestDetails } from 'src/common/types/BookingDetailTypes';
+
 
 @Injectable()
 export class TriggersService {
@@ -48,121 +50,125 @@ export class TriggersService {
     });
 
     // Define the results object.
-    const results: {
+    const results:{
       trigger: Trigger, 
       event: BookingDetails
     }[] = []
 
     let prevBusinessId = -1;
-    let bookingDetails : BookingDetails[] = [];
+    let bookingDetails : BookingDetailsWithRequestDetails[] = [];
 
     for (const trigger of timeTriggers) {
 
       const triggerCondition = trigger.condition as any as TriggerCondition;
-      //
+
       // Only Update the booking Details list when the trigger belongs to a new User Triggers are ordered by user.
-      bookingDetails = (bookingDetails.length !== 0 && prevBusinessId  !== -1 &&  prevBusinessId === trigger.createdByUserId)
-        ?  bookingDetails
-        : await this.prismaService.bookingDetails
-        .findMany({
-          where: {
-            business_id: trigger.business_id,
-          },
-          include: {
-            request:true,
+      bookingDetails = 
+        (bookingDetails.length !== 0 && prevBusinessId  !== -1 &&  prevBusinessId === trigger.createdByUserId)
+          ?  bookingDetails
+          : await this.prismaService.bookingDetails
+          .findMany({
+            where: {
+              business_id: trigger.business_id,
+            },
+            include: {
+              request:true,
+            }
+          });
+
+
+          for (const event of bookingDetails)  {
+            let shouldTrigger = this.shouldTriggerOnCondition(event, triggerCondition);
+
+            if (shouldTrigger) {
+              results.push({
+                trigger: trigger,
+                event: event,
+              })
+            }
           }
-        });
 
-
-        for (const event of bookingDetails)  {
-          if (this.shouldTriggerOnCondition(event, triggerCondition)) {
-            results.push({
-              trigger: trigger,
-              event: event,
-            })
-          }
-        }
-
-        prevBusinessId = trigger.createdByUserId;
+          prevBusinessId = trigger.createdByUserId;
     }
 
     return results;
   }
 
-  async shouldTriggerOnCondition(event: any, triggerCondition: TriggerCondition) : Promise<boolean> {
+  shouldTriggerOnCondition(event: BookingDetailsWithRequestDetails, triggerCondition: TriggerCondition) : boolean {
 
     let shouldTrigger = false;
 
     switch (triggerCondition.type) {
       case 'time-offset':
         // TODO: Make this so that a user can choose what status the event should be in. SEE GPT RESULTS.
-        if(this.shouldTriggerByTime(event, triggerCondition) && await this.isEventAcceptedStatus(event)) {
-          shouldTrigger = true;
-        }
+        shouldTrigger = this.shouldTriggerByTime(event, triggerCondition) 
       break;
       case 'field-equals':
-        if(this.shouldTriggerByFieldEquals(event, triggerCondition)) {
-          shouldTrigger = true;
-        }
+        shouldTrigger = this.shouldTriggerByFieldEquals(event, triggerCondition)
       break;
       case 'field-in':
-        if(this.shouldTriggerByFieldIn(event, triggerCondition)) {
-          shouldTrigger = true;
-        }
+        shouldTrigger = this.shouldTriggerByFieldIn(event, triggerCondition)
       break;
       case 'and':
         case 'or':
-        if(this.shouldTriggerLogicalCondition(event, triggerCondition)) {
-          shouldTrigger = true;
-        }
+        shouldTrigger = this.shouldTriggerLogicalCondition(event, triggerCondition)
       break;
       default: 
-        break;
+        Logger.warn(`[Trigger.service] Trigger Condition Type Not Found: ${triggerCondition}`)
+      break;
     }
 
     return shouldTrigger;
 
   }
 
-  private shouldTriggerByTime(event: BookingDetails, triggerCondition: TimeCondition) : boolean {
+  private shouldTriggerByTime(event: BookingDetails , triggerCondition: TimeCondition) : boolean {
+
     const targetDate = new Date(event[triggerCondition.targetField]);
+    targetDate.setHours(0,0,0,0)
+
     const now = new Date();
-    const diffIfMS = (targetDate.getTime() - now.getTime())
-    const msInDay = 1000 * 60 * 60 * 24;
+    now.setHours(0,0,0,0);
 
-    const diff = (Math.floor(diffIfMS / msInDay) == triggerCondition.offsetDays) 
+    const diffInMS = (targetDate.getTime() - now.getTime())
+    const msInDay = (1000 * 60 * 60 * 24);
+    const diffDays = Math.round( diffInMS / msInDay);
+
+
+    const diff = (diffDays == triggerCondition.offsetDays) 
+
     return diff; 
-  }
 
-  /**
-   * Checks if the event is in a accepted status.
-   */
-  private async isEventAcceptedStatus(event: BookingDetails) {
-    const eventStatus = await this.prismaService.request.findFirst({
-      where: {
-        booking_id: event.id,
-      }
-    })
-
-    return eventStatus.status == "APPROVED";
   }
 
 
   // TODO: SUPPORT FOR FIELD IN STATUS NOT SUPPORTED YET, WILL BE REQUIRED FOR TRIGGERS THAT ARE CAUSED BY STAUS CHANGE.
-  private shouldTriggerByFieldIn(event: BookingDetails, triggerCondition: FieldInCondition) : boolean {
+  private shouldTriggerByFieldIn(event: BookingDetailsWithRequestDetails, triggerCondition: FieldInCondition) : boolean {
     return triggerCondition.values.includes(event[triggerCondition.field]);
   }
 
-  // TODO: SUPPORT FOR FIELD EQUALS NO SUPPORTED YET.
-  private shouldTriggerByFieldEquals(event: BookingDetails, triggerCondition: FieldEqualsCondition) : boolean {
-    // TODO : Make this know what table is required to be checked.
-    return event[triggerCondition.field] === triggerCondition.value;
+  private shouldTriggerByFieldEquals(event: BookingDetailsWithRequestDetails, triggerCondition: FieldEqualsCondition) : boolean {
+    const eventValue = this.getNestedValue(event, triggerCondition.field);
+    return eventValue === triggerCondition.value;
+  }
+
+  /**
+   * Method to get the actual value of nested fields
+   */
+  getNestedValue(event: BookingDetailsWithRequestDetails, path: string) {
+    return path.split('.')                        
+        .reduce((acc, key) => {            
+            if (acc && typeof acc === 'object' && key in acc) {
+                return acc[key];               
+            }
+            return undefined;               
+        }, event);
   }
 
   /**
    * Processes all conditions of a "Logical" Conditional
    */
-  private shouldTriggerLogicalCondition(event: BookingDetails, triggerCondition: LogicalCondition) : boolean {
+  private shouldTriggerLogicalCondition(event: BookingDetailsWithRequestDetails, triggerCondition: LogicalCondition) : boolean {
     let areConditionsMet = false; 
     if (triggerCondition.type == 'and') {
       areConditionsMet = triggerCondition.conditions.every(c => this.shouldTriggerOnCondition(event, c))
