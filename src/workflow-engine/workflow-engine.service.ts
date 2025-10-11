@@ -51,6 +51,7 @@ export class WorkflowEngineService {
   private async runStep(step: WorkflowStep, context: any) {
     switch(step.action) {
       case WorkflowAction.SEND_EMAIL: 
+        Logger.warn("WorkflowEngineService(): Workflow Step : SEND EMAIL")
         const { text, html } = await this.templateService.buildTemplate(step.templateId, context.data)
         return this.emailService.sendEmailMessage(step.from, step.to, step.subject, text, html);
       default: 

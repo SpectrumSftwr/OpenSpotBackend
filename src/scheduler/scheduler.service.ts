@@ -6,7 +6,6 @@ import { WorkflowsService } from 'src/workflows/workflows.service';
 import { EmittableType } from 'src/event-bus/dto/EmittableContext.dto';
 import { TemplateContextService } from 'src/template-context/template-context.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { type } from 'os';
 import { EventContext } from 'src/triggers/dto/eventContext.dto';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class SchedulerService {
   /**
    * Method to reload all triggers and workflows daily before triggers are all run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_NOON, {
+  @Cron(CronExpression.EVERY_DAY_AT_9AM, {
     name: "reload-triggers-cron-job"
   }) // NOTE:  Cron = every hour at exactly the hour
   async reloadTriggers() {
@@ -35,12 +34,13 @@ export class SchedulerService {
   /**
    * Method to Run All triggers that need to be run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_1PM, {
+  @Cron(CronExpression.EVERY_DAY_AT_NOON, {
     name: "run-triggers-cron-job"
   }) 
   async checkTimeTriggers() {
 
     Logger.log("[SchedulerService.checkTimeTriggers] Starting Up Time Triggers.")
+
     const dueTriggerEvents = await this.triggerService.findDueTriggers();
     Logger.log(`[SchedulerService.checkTimeTriggers] Found ${dueTriggerEvents.length} event triggers that need to be run.`)
     

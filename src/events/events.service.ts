@@ -9,6 +9,7 @@ import { TemplateContextService } from 'src/template-context/template-context.se
 import { BusinessService } from 'src/business/business.service';
 import { GetUserEventsDto } from './dtos/GetUserEventsDto.dto';
 import { EventsStatisticsDto } from './dtos/EventsStatisticsDto.dto';
+import { UserEventTypes } from 'src/common/types/AutomationEventTypes';
 
 @Injectable()
 export class EventsService {
@@ -64,7 +65,7 @@ export class EventsService {
 
     // Package the Event into a template object
     const eventContext : EventContext = {
-      type: 'event.created',
+      type: UserEventTypes.CREATED,
       belongsTo: businessDetails,
       data: {
         ...await this.templateContext.buildContext(businessDetails, bookingDetails)
@@ -309,7 +310,7 @@ export class EventsService {
 
     }
 
-    Logger.warn("Successfully Updated the Status of the given event.");
+    Logger.warn("Successfully Updated the Status of the given event");
 
     this.runAutomationOnEventUpdate(updatedRequest);
 
@@ -383,16 +384,16 @@ export class EventsService {
       let type = "event";
 
       if (updatedRequest.status == "APPROVED") {
-        type = 'event.approved';
+        type = UserEventTypes.APPROVED;
       }
       else if (updatedRequest.status == "REJECTED") {
-        type = 'event.rejected';
+        type = UserEventTypes.REJECTED;
       }
       else if (updatedRequest.status == "PAID") {
-        type = 'event.paid';
+        type = UserEventTypes.PAID;
       }
       else if (updatedRequest.status == "COMPLETED") {
-        type = 'event.completed';
+        type = UserEventTypes.COMPLETED;
       }
 
       eventContext.type = type;
