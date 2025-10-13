@@ -1,3 +1,5 @@
+import { Trigger } from "@prisma/client";
+
 enum TemplateVarClass {
   BUSINESS,
   CLIENT,
@@ -21,7 +23,6 @@ export class TTemplateVarContext {
       email: string,
       phoneNumber: string,
     }
-
     client: {
       firstName: string, 
       lastName: string, 
@@ -35,10 +36,21 @@ export class TTemplateVarContext {
         duration: string,
         eventType: string, 
         packageName: string, 
+        packageInclusions: string,
         guestCount: string,
         comments: string,
+        totalPrice: string,
+        finalPaymentDueDate: string,
+        reviewLink: string,
+        surveyLink: string,
       }
     }
+    trigger: TriggerDetails | null
+}
+
+type TriggerDetails = {
+  trigger: String, 
+  sentAt: string
 }
 
 /**

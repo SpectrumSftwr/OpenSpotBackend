@@ -34,7 +34,7 @@ export class TriggersService {
   /**
    * Evaluates an event context to get all triggers that need to be fired.
    */
-  async evaluateTriggers(eventContext: EventContext): Promise<any[]> {
+  async evaluateTriggers(eventContext: EventContext): Promise<Trigger[]> {
     return this.triggers.filter(t => t.type === TriggerTypes.USER_BASED 
                                 && t.eventType === eventContext.type
                                 && t.business_id === eventContext.belongsTo.id);

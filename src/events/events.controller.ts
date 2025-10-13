@@ -62,8 +62,10 @@ export class EventsController {
     const status : RequestStatusEnum = reqBody.status;
     const requestNotes: string = reqBody.notes;
     const rejectionReason : string = reqBody.rejectionReason;
+    const totalPrice : string = reqBody.totalPrice;
+    const dueBy: string = reqBody.dueBy;
 
-    return await this.eventsService.updateEventStatus(confirmationID, status, requestNotes, rejectionReason);
+    return await this.eventsService.updateEventStatus(confirmationID, status, requestNotes, rejectionReason, totalPrice, dueBy);
   }
 
   @Post("/notes") 

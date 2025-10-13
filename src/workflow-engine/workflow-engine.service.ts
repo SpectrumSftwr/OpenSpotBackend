@@ -4,6 +4,7 @@ import { EmailService } from 'src/email/email.service';
 import { TemplateBuilderService } from 'src/template-builder/template-builder.service';
 import { WorkflowAction, WorkflowStep } from 'src/workflows/dto/workflowstep.dto';
 import Handlebars from 'handlebars';
+import { EventContext } from 'src/triggers/dto/eventContext.dto';
 
 @Injectable()
 export class WorkflowEngineService {
@@ -13,7 +14,7 @@ export class WorkflowEngineService {
     private templateService : TemplateBuilderService
   ){}
 
-  async runWorkflow(workflow: Workflow, context: any) {
+  async runWorkflow(workflow: Workflow, context: EventContext) {
     // get all the steps of the workflow 
     try {
       const steps: WorkflowStep[] = workflow.steps as any as WorkflowStep[]; 
@@ -33,12 +34,11 @@ export class WorkflowEngineService {
    * A separate method will be used in the template service to build the 
    * Email/SMS/Notification Content.
    */
-  private render(step: WorkflowStep, context: any) : WorkflowStep {
+  private render(step: WorkflowStep, context: EventContext) : WorkflowStep {
     for (const key in step) {
       try {
-        const stepKey = step[key];
-
-        const template = Handlebars.compile(stepKey.toString());
+        const stepTemplate = step[key];
+        const template = Handlebars.compile(stepTemplate.toString());
         step[key] = template(context.data);
       } catch (err) {
         Logger.error("[WorkflowEngineService] Unable to compile template using handlebars:", err)
@@ -48,7 +48,7 @@ export class WorkflowEngineService {
     return step;
   }
 
-  private async runStep(step: WorkflowStep, context: any) {
+  private async runStep(step: WorkflowStep, context: EventContext) {
     switch(step.action) {
       case WorkflowAction.SEND_EMAIL: 
         Logger.warn("WorkflowEngineService(): Workflow Step : SEND EMAIL")

@@ -33,12 +33,14 @@ export class EmailService {
 
       Logger.log("Workflow Enginee: Sending Email")
       await this.mailgunClient.messages.create("notifications.openspotapp.com", request);
+      Logger.log(`Workflow Enginee: Email Sent to ${request.to}`)
 
       return true;
 
     } catch (error) {
+      Logger.error("[EmailService] Something Went Wrong while sending the email:"); //logs any error
+      Logger.error(error); //logs any error
 
-      Logger.error("[EmailService] Something Went Wrong while sending the email:", error); //logs any error
       return false;
     }
   }

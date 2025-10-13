@@ -279,7 +279,10 @@ export class EventsService {
   async updateEventStatus(confirmationID: string, 
                           status: RequestStatusEnum, 
                           notes: string,
-                          rejectionNotes: string) : Promise<Request>{
+                          rejectionNotes: string,
+                          totalPrice: string,
+                          dueBy: string
+                         ) : Promise<Request>{
     
     // get the booking. 
     const requestToUpdate = await this.prisma.request.findFirst({
@@ -308,6 +311,21 @@ export class EventsService {
 
       this.updateNotes(confirmationID, notes, rejectionNotes);
 
+    }
+
+    // If event was Approved set the price and due date.
+    if (updatedRequest.status === "APPROVED" && totalPrice && dueBy) {
+      await this.prisma.bookingDetails.update({
+        where: {
+          confirmationId: confirmationID
+        },
+        data: {
+          totalEventPrice: Number(totalPrice),
+          dueBy: new Date(dueBy),
+        }
+      })
+
+      Logger.log("Successfully Added a Event Price and dueBy date.")
     }
 
     Logger.warn("Successfully Updated the Status of the given event");

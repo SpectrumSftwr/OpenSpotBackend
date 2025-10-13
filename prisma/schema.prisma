@@ -45,6 +45,7 @@ model Business {
     business_packages   BusinessPackage[]
     business_request    Request[]
     business_bookings   BookingDetails[]
+    booking_payments    BookingPayments[]
 
     triggers            Trigger[]
     packageItem         PackageItemOnPackage[]
@@ -140,11 +141,29 @@ model BookingDetails {
 
     package_id          Int         
     package             BusinessPackage   @relation(fields: [package_id], references: [id])
+
+    BookingPayments     BookingPayments[]
+
     request             Request?
     eventNotes          EventNotes?
 
+    totalEventPrice     Float?
+    dueBy               DateTime?
+
     created_at          DateTime          @default(now())
     updated_at          DateTime          @updatedAt
+}
+
+model BookingPayments {
+  id                  Int               @id @default(autoincrement())
+  businessId          Int
+  business            Business          @relation(fields: [businessId], references: [id])
+
+  bookingDetailsId    Int
+  bookingDetails      BookingDetails    @relation(fields: [bookingDetailsId], references: [id])
+
+  amountPayed         Float 
+  payedOn             DateTime
 }
 
 model Trigger {

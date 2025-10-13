@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Workflow } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { EventContext } from 'src/triggers/dto/eventContext.dto';
 import { WorkflowEngineService } from 'src/workflow-engine/workflow-engine.service';
 
 @Injectable()
@@ -25,12 +26,11 @@ export class WorkflowsService {
     this.workflows.push(workflow);
   }
 
-  async executeWorkflow(workflowId: number, context: any) {
+  async executeWorkflow(workflowId: number, context: EventContext) {
     Logger.log(`Begining Execution of Workflow ID ${workflowId}`);
     const wf = this.workflows.find(w => w.id === workflowId);
     if (!wf) return;
 
     this.workflowEngineService.runWorkflow(wf, context);
   }
-
 }
