@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BookingDetails, Business, PackageItemOnPackage } from '@prisma/client';
+import { request } from 'http';
 import { TTemplateVarContext } from 'src/common/constants/template.constants';
 import { PersonalDetailsContextDto } from 'src/events/dtos/EventDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,6 +19,12 @@ export class TemplateContextService {
     const bookingPackage = await this.prisma.businessPackage.findFirst({where:{
       id: bookingDetails.package_id
     }})
+
+    const bookingNotes = await this.prisma.eventNotes.findFirst({
+      where: {
+        booking_id: bookingDetails.id
+      } 
+    })
 
     const inclusions : PackageItemOnPackage[] = await this.prisma.packageItemOnPackage.findMany({
       where: {
@@ -68,9 +75,9 @@ export class TemplateContextService {
               // TODO: REVIEW AND SURVEY LINKS.
               reviewLink: "TBD",
               surveyLink: "TBD",
+              eventRejectionReason: bookingNotes.rejectionNotes
             }
           },
-
           trigger: null,
 
       }

@@ -32,7 +32,7 @@ export class TriggerListener {
               month: "long",
               day: "numeric"
           }),
-        trigger: trigger.type
+        name: trigger.name
       };
 
       await this.workflowService.executeWorkflow(trigger.workflowId, context);
@@ -47,7 +47,7 @@ export class TriggerListener {
               month: "long",
               day: "numeric"
           }),
-        trigger: trigger.type
+        name: trigger.type
       };
 
       await this.workflowService.executeWorkflow(trigger.workflowId, context);

@@ -43,13 +43,14 @@ export class TTemplateVarContext {
         finalPaymentDueDate: string,
         reviewLink: string,
         surveyLink: string,
+        eventRejectionReason: string,
       }
     }
     trigger: TriggerDetails | null
 }
 
 type TriggerDetails = {
-  trigger: String, 
+  name: String, 
   sentAt: string
 }
 

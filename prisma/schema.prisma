@@ -169,6 +169,7 @@ model BookingPayments {
 model Trigger {
     id                  Int               @id @default(autoincrement())
 
+    name                String?
     type                TriggerTypes      
     eventType           String?
     condition           Json?
