@@ -22,7 +22,7 @@ export class SchedulerService {
   /**
    * Method to reload all triggers and workflows daily before triggers are all run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_9AM, {
+  @Cron(CronExpression.EVERY_30_MINUTES, {
     name: "reload-triggers-cron-job"
   }) // NOTE:  Cron = every hour at exactly the hour
   async reloadTriggers() {
