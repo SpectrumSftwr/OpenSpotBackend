@@ -75,7 +75,7 @@ export class TemplateContextService {
               // TODO: REVIEW AND SURVEY LINKS.
               reviewLink: "TBD",
               surveyLink: "TBD",
-              eventRejectionReason: bookingNotes.rejectionNotes
+              eventRejectionReason: bookingNotes ? bookingNotes.rejectionNotes : ""
             }
           },
           trigger: null,

@@ -34,7 +34,7 @@ export class SchedulerService {
   /**
    * Method to Run All triggers that need to be run.
    */
-  @Cron(CronExpression.EVERY_DAY_AT_10AM, {
+  @Cron(CronExpression.EVERY_5_MINUTES, {
     name: "run-triggers-cron-job"
   }) 
   async checkTimeTriggers() {
