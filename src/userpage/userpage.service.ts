@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProfileDetails } from './dto/ProfileDetails.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Business, BusinessGallery, BusinessPackage } from '@prisma/client';
@@ -299,6 +299,7 @@ export class UserpageService {
 
 
       if (businessDetails == null) {
+        Logger.error("Unable to get business packages Business Details Not Found.");
         return {
           hasError: true
         };

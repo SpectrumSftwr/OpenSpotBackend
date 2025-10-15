@@ -24,10 +24,14 @@ export class EventsService {
     const generatedConfimation = this.generateConfirmation();
 
     let businessDetails : Business = await this.prisma.business.findFirst({where: {
-      business_UID: eventsDto.business_uid,
+      business_UID: {
+        equals: eventsDto.business_uid,
+        mode: "insensitive"
+      }
     }})
 
     if (businessDetails == null) {
+      Logger.error(`No Business Details Where found for the event dto: ${eventsDto.business_uid}`)
       return {
         hasError: true
       };
