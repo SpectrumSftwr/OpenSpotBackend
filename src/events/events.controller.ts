@@ -77,4 +77,9 @@ export class EventsController {
 
     await this.eventsService.updateNotes(confirmationID, requestNotes, rejectionReason);
   }
+
+  @Get('/requesteditems/:bookingId')
+  async getRequestedItemsForAnEvent(@Param('bookingId') bookingId: string) {
+    return await this.eventsService.getPackageAndAddOnsForBooking(bookingId);
+  }
 }

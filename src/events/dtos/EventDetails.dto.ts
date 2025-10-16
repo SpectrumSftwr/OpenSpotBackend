@@ -8,6 +8,7 @@ export class EventDetails {
   guestCount: number;
   packageId: number;
   personalDetails: PersonalDetailsContextDto 
+  addOns: number[]
 }
 
 

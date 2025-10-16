@@ -54,6 +54,9 @@ export class EventsService {
         confirmationId: generatedConfimation, 
         personal_details: {
           ...eventsDto.personalDetails
+        },
+        optionalAddOns: {
+          connect: eventsDto.addOns.map((id) => ({id})),
         }
       }
     })
@@ -423,6 +426,40 @@ export class EventsService {
       Logger.log(eventContext);
 
       this.eventBusService.emit(EmittableType.USER_CREATED_EVENT, eventContext)
+    }
+  }
+
+  async getPackageAndAddOnsForBooking(bookingId: string) : Promise<any> {
+    const bookingDetails = await this.prisma.bookingDetails.findFirst({
+      where: {
+        confirmationId: {
+          equals: bookingId,
+          mode: 'insensitive'
+        }
+      },
+      include: {
+        package: {
+          include: {
+            packageFeatures: true
+          }
+        },
+        optionalAddOns: true
+      }
+    })
+
+    const packageInclusions = await this.prisma.businessPackageItem.findMany({
+      where: {
+        id: {
+          in: bookingDetails.package.packageFeatures.map((feature) => feature.packageItemId)
+        }
+      }
+    })
+
+    bookingDetails.package['inclusions'] = packageInclusions;
+
+    return {
+      package: bookingDetails.package,
+      optionalAddOns: bookingDetails.optionalAddOns,
     }
   }
 }

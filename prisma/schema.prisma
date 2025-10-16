@@ -49,7 +49,7 @@ model Business {
 
     triggers            Trigger[]
     packageItem         PackageItemOnPackage[]
-
+    optionalAddOns      OptionalAddOns[]
 }
 
 model BusinessGallery {
@@ -146,6 +146,7 @@ model BookingDetails {
 
     request             Request?
     eventNotes          EventNotes?
+    optionalAddOns      OptionalAddOns[]
 
     totalEventPrice     Float?
     dueBy               DateTime?
@@ -234,4 +235,17 @@ model PackageItemOnPackage {
   
   businessId        Int                 
   business          Business            @relation(fields: [businessId], references: [id])
+}
+
+model OptionalAddOns {
+  id                  Int                 @id @default(autoincrement())
+  name                String
+  description         String
+  price               Float
+
+  businessId          Int
+  business            Business          @relation(fields: [businessId], references: [id])
+
+  bookingDetails      BookingDetails[]  
+
 }

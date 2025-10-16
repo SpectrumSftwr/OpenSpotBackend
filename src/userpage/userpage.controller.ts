@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserpageService } from './userpage.service';
 import UserService from 'src/user/user.service';
 
@@ -49,5 +49,15 @@ export class UserpageController {
   @Get('/package_details/:package_id')
   getEventDetails(@Param('package_id') package_id: string) {
     return this.userpageService.getPackageDetails(package_id);
+  }
+
+  @Get('/addons/:business_uid')
+  getBusinessAddOns(@Param('business_uid') business_uid: string) {
+    return this.userpageService.getBusinessAddOns(business_uid);
+  }
+
+  @Post('/addons')
+  getAllAddOnsWithIds(@Body('addOnIds') addOnIds: number[]) {
+    return this.userpageService.getAddOnsWithIds(addOnIds);
   }
 }

@@ -6,6 +6,7 @@ import { ReviewBreakdownDto } from './dto/ReviewBreakdown.dto';
 import { Filters } from 'src/common/dto/filters.dto';
 import { PackageDto } from './dto/Package.dto';
 import { UserStorageService } from 'src/user-storage/user-storage.service';
+import { OptionalAddOns } from '@prisma/client'
 
 @Injectable()
 export class UserpageService {
@@ -368,5 +369,44 @@ export class UserpageService {
       }
 
       return convertedPackages ? convertedPackages : {hasError: true};
+    }
+
+    async getBusinessAddOns(business_UID: string) : Promise<OptionalAddOns[]> {
+
+      let business = await this.prisma.business.findFirst({
+        where: {
+          business_UID: {
+            equals: business_UID,
+            mode: 'insensitive'
+          }
+        }
+      })
+      
+      if (!business) {
+        Logger.error(`[Userpage.service] Unable to find a busines with UID: ${business_UID}`)
+        throw new Error("Failed to get Business Event Add ons")
+      }
+
+      let optionalAddOns = await this.prisma.optionalAddOns.findMany({
+        where: {
+          businessId: business.id
+        }
+      })
+
+      return optionalAddOns;
+    }
+
+    async getAddOnsWithIds(addOns: number[]) : Promise<OptionalAddOns[]> {
+
+      const addOnResults = await this.prisma.optionalAddOns.findMany({
+        where: {
+          id: {
+            in: addOns.map(Number)
+          }
+        }
+      })
+
+      return addOnResults;
+
     }
 }
