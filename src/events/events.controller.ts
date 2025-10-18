@@ -82,4 +82,20 @@ export class EventsController {
   async getRequestedItemsForAnEvent(@Param('bookingId') bookingId: string) {
     return await this.eventsService.getPackageAndAddOnsForBooking(bookingId);
   }
+
+  @Post('/create/review')
+  async createNewEventReview(@Body() body: any) {
+    
+    console.log(body);
+    // Destructure the body
+    const businessUID = body.businessUID;
+    const from = body.from;
+    const rating = body.rating as number;
+    const comment = body.comment;
+    const eventDate = body.eventDate;
+    console.log("EVENTDATE:")
+    console.log(eventDate)
+    
+    return await this.eventsService.createNewEventReview(businessUID, from, rating, comment, eventDate);
+  }
 }

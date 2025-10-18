@@ -73,7 +73,7 @@ export class TemplateContextService {
               }) : "Unknown",
               //
               // TODO: REVIEW AND SURVEY LINKS.
-              reviewLink: "TBD",
+              reviewLink: `http://openspotapp.com/${business.business_UID}/reviews/create`,
               surveyLink: "TBD",
               eventRejectionReason: bookingNotes ? bookingNotes.rejectionNotes : ""
             }

@@ -462,4 +462,33 @@ export class EventsService {
       optionalAddOns: bookingDetails.optionalAddOns,
     }
   }
+
+  async createNewEventReview(business_UID: string, from: string, rating: number, comment: string, event_date: string ) {
+    const business = await this.prisma.business.findFirst({
+      where: {
+        business_UID: {
+          equals: business_UID,
+          mode: 'insensitive',
+        }
+      }
+    })
+
+
+    const review = await this.prisma.businessReviews.create({
+      data: {
+        business_id: business.id,
+        from: from,
+        rating: rating,
+        comment: comment,
+        event_date: new Date(event_date)
+      }
+    })
+
+    if (!review) {
+      Logger.error("Something went wrong when creating the new Review");
+      throw new Error("Unable to create the Review");
+    }
+
+    return review;
+  }
 }
