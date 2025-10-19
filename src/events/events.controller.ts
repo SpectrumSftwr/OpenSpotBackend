@@ -93,8 +93,6 @@ export class EventsController {
     const rating = body.rating as number;
     const comment = body.comment;
     const eventDate = body.eventDate;
-    console.log("EVENTDATE:")
-    console.log(eventDate)
     
     return await this.eventsService.createNewEventReview(businessUID, from, rating, comment, eventDate);
   }

@@ -464,6 +464,7 @@ export class EventsService {
   }
 
   async createNewEventReview(business_UID: string, from: string, rating: number, comment: string, event_date: string ) {
+
     const business = await this.prisma.business.findFirst({
       where: {
         business_UID: {
@@ -473,6 +474,7 @@ export class EventsService {
       }
     })
 
+    Logger.log(`[Events.service] Creating a new Review for ${business.business_UID}`)
 
     const review = await this.prisma.businessReviews.create({
       data: {
