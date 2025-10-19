@@ -88,7 +88,7 @@ export class EventsController {
     
     console.log(body);
     // Destructure the body
-    const businessUID = body.businessUID;
+    const businessUID = body.business_UID;
     const from = body.from;
     const rating = body.rating as number;
     const comment = body.comment;
