@@ -463,7 +463,12 @@ export class EventsService {
     }
   }
 
+  /**
+   * Creates a new Review For a business.
+   */
   async createNewEventReview(business_UID: string, from: string, rating: number, comment: string, event_date: string ) {
+
+    Logger.log(`[Event.service] Finding first business where Business UID: ${business_UID}`)
 
     const business = await this.prisma.business.findFirst({
       where: {
@@ -475,6 +480,11 @@ export class EventsService {
     })
 
     Logger.log(`[Events.service] Creating a new Review for ${business.business_UID}`)
+    
+    // TOOD: FIGURE OUT WHY THIS HAPPENS?
+    if (business.business_UID !== business_UID) {
+      throw new Error("Business Name Mismatch");
+    }
 
     const review = await this.prisma.businessReviews.create({
       data: {
