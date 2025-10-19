@@ -481,11 +481,6 @@ export class EventsService {
 
     Logger.log(`[Events.service] Creating a new Review for ${business.business_UID}`)
     
-    // TOOD: FIGURE OUT WHY THIS HAPPENS?
-    if (business.business_UID !== business_UID) {
-      throw new Error("Business Name Mismatch");
-    }
-
     const review = await this.prisma.businessReviews.create({
       data: {
         business_id: business.id,
